@@ -1,0 +1,3269 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>לוח מודעות בית כנסת - מערכת ניהול חכמה ומסונכרנת</title>
+    <script src="xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1E3A8A;
+            --bg-color: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text-main: #0F172A;
+            --text-secondary: #64748B;
+            --border-color: #CBD5E1;
+            --accent-color: #38BDF8;
+            --header-bg: #0F172A;
+            --footer-text: #64748B;
+            --card-border-radius: 16px;
+            --theme-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            --ornament-display: none;
+        }
+
+        body.theme-gold {
+            --primary-color: #B45309;
+            --bg-color: #1C1917;
+            --card-bg: #292524;
+            --text-main: #FAFAF9;
+            --text-secondary: #A8A29E;
+            --border-color: #78716C;
+            --accent-color: #F59E0B;
+            --header-bg: #12100E;
+            --footer-text: #D97706;
+            --card-border-radius: 20px;
+            --theme-shadow: 0 8px 24px rgba(245, 158, 11, 0.15);
+            --ornament-display: block;
+        }
+
+        body.theme-jerusalem {
+            --primary-color: #881337;
+            --bg-color: #FFFBEB;
+            --card-bg: #FFFFFF;
+            --text-main: #451A03;
+            --text-secondary: #78350F;
+            --border-color: #D97706;
+            --accent-color: #B45309;
+            --header-bg: #4C0519;
+            --footer-text: #9F1239;
+            --card-border-radius: 12px;
+            --theme-shadow: 0 6px 18px rgba(136, 19, 55, 0.1);
+            --ornament-display: block;
+        }
+
+        body.theme-sky {
+            --primary-color: #0369A1;
+            --bg-color: #F0F9FF;
+            --card-bg: #FFFFFF;
+            --text-main: #0C4A6E;
+            --text-secondary: #0284C7;
+            --border-color: #BAE6FD;
+            --accent-color: #0284C7;
+            --header-bg: #034E75;
+            --footer-text: #0284C7;
+            --card-border-radius: 24px;
+            --theme-shadow: 0 6px 20px rgba(3, 105, 161, 0.08);
+            --ornament-display: none;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .app-container {
+            width: 100vw;
+            height: 100vh;
+            max-width: 1280px;
+            max-height: 720px;
+            background: var(--bg-color);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid var(--border-color);
+        }
+
+        .live-clock-bar {
+            background: var(--header-bg);
+            color: white;
+            padding: 8px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            height: calc(100% - 37px);
+            padding: 24px 32px 32px 32px;
+            box-sizing: border-box;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .slide-ornament-top {
+            display: var(--ornament-display);
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            color: var(--accent-color);
+            letter-spacing: 12px;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        #loginScreen {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: var(--bg-color);
+            height: 100%;
+        }
+
+        .login-box {
+            background: var(--card-bg);
+            padding: 36px 40px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: var(--theme-shadow);
+        }
+
+        .login-error-msg {
+            color: #EF4444;
+            font-size: 13px;
+            font-weight: bold;
+            display: none;
+            text-align: center;
+        }
+
+        .login-links {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .login-links a {
+            color: var(--accent-color);
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .login-links a:hover {
+            text-decoration: underline;
+        }
+
+        #mainMenuScreen {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: var(--bg-color);
+        }
+
+        h1.main-title {
+            font-size: 36px;
+            color: var(--text-main);
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 8px;
+            width: 100%;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background-color: var(--border-color);
+            color: var(--text-main);
+        }
+
+        .slide-header {
+            text-align: center;
+            font-size: 24px;
+            color: var(--primary-color);
+            font-weight: bold;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+
+        .badge-title {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 28px;
+            border-radius: 30px;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 4px auto;
+            display: inline-block;
+            box-shadow: var(--theme-shadow);
+        }
+
+        .card-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--card-border-radius);
+            padding: 16px;
+            text-align: center;
+            box-shadow: var(--theme-shadow);
+        }
+
+        .roles-container {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin: 8px 0;
+        }
+
+        .role-card {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .role-title {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .role-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-main);
+            margin-top: 4px;
+        }
+
+        .aliyot-table {
+            display: flex;
+            gap: 6px;
+            height: 100px;
+            margin: 8px 0;
+        }
+
+        .aliya-col {
+            flex: 1;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: var(--theme-shadow);
+        }
+
+        .aliya-header {
+            background: var(--primary-color);
+            color: white;
+            font-size: 13px;
+            font-weight: bold;
+            text-align: center;
+            padding: 6px 0;
+        }
+
+        .aliya-body {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: bold;
+            text-align: center;
+            padding: 0 4px;
+            color: var(--text-main);
+        }
+
+        .times-box {
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 10px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--card-border-radius);
+            box-shadow: var(--theme-shadow);
+            align-items: center;
+        }
+
+        .time-item {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .time-icon {
+            font-size: 26px;
+            line-height: 1;
+            margin-bottom: 2px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .time-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .time-val {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .center-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--card-border-radius);
+            padding: 24px;
+            text-align: center;
+            flex: 1;
+            margin: 12px 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: var(--theme-shadow);
+        }
+
+        .footer-note {
+            text-align: center;
+            font-size: 13px;
+            color: var(--footer-text);
+            font-weight: normal;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .admin-tabs {
+            display: flex;
+            gap: 6px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-main);
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+            overflow-y: auto;
+            flex: 1;
+            padding-left: 12px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            font-size: 13px;
+            color: var(--text-main);
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            background: var(--card-bg);
+            color: var(--text-main);
+        }
+
+        .form-group select:disabled, .form-group input:disabled {
+            background-color: var(--border-color);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        /* עיצוב סרגל עורך טקסט מעודכן עם אייקונים בסגנון Word */
+        .editor-toolbar {
+            display: flex;
+            gap: 6px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            padding: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .editor-btn {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            width: 32px;
+            height: 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .editor-btn:hover {
+            background: var(--border-color);
+        }
+
+        .editor-select {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            height: 30px;
+        }
+
+        /* כפתור צבע טקסט עם אייקון A ופס צבע מתחתיו */
+        .color-picker-btn-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            width: 36px;
+            height: 30px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .color-picker-btn-wrapper:hover {
+            background: var(--border-color);
+        }
+        .color-picker-btn-wrapper input[type="color"] {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .color-icon-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1;
+        }
+        .color-icon-letter {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--text-main);
+        }
+        .color-icon-bar {
+            width: 14px;
+            height: 3px;
+            background-color: #0F172A;
+            margin-top: 1px;
+            border-radius: 1px;
+        }
+
+        .rich-textarea {
+            min-height: 120px;
+            max-height: 220px;
+            overflow-y: auto;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
+            padding: 10px;
+            color: var(--text-main);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .glass-slide-control {
+            position: absolute;
+            bottom: 18px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 8px 16px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .glass-slide-control:hover {
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .glass-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .glass-btn:hover {
+            color: var(--primary-color);
+            background: rgba(0, 0, 0, 0.06);
+            transform: scale(1.1);
+        }
+
+        .glass-btn svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            stroke-width: 2.2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .glass-divider {
+            width: 1px;
+            height: 16px;
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .slide-dots-indicator {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 0 4px;
+        }
+
+        .slide-dot-item {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.25);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .slide-dot-item:hover {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .slide-dot-item.active {
+            background: var(--primary-color);
+            transform: scale(1.35);
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.2);
+        }
+
+        .control-btn {
+            background: var(--border-color);
+            color: var(--text-main);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .sub-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .sub-tab-btn {
+            flex: 1;
+            padding: 6px;
+            background: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .sub-tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        .sub-content {
+            display: none;
+        }
+        .sub-content.active {
+            display: block;
+        }
+
+        .congregants-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .congregants-table th, .congregants-table td {
+            border: 1px solid var(--border-color);
+            padding: 6px;
+            text-align: center;
+            font-size: 13px;
+        }
+        .congregants-table th {
+            background-color: var(--border-color);
+            color: var(--text-main);
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .action-btn-auto {
+            flex: 1.5;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .action-btn-add {
+            flex: 1.5;
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .action-btn-export {
+            flex: 1;
+            background: #F97316;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .import-box {
+            background: var(--card-bg);
+            border: 2px dashed var(--border-color);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-box {
+            background: var(--card-bg);
+            color: var(--text-main);
+            padding: 28px;
+            border-radius: 16px;
+            width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: var(--theme-shadow);
+            border: 1px solid var(--border-color);
+        }
+        .modal-box label {
+            font-size: 13px;
+            color: var(--text-main);
+            font-weight: bold;
+        }
+        .modal-box input, .modal-box select, .modal-box textarea {
+            padding: 10px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 14px;
+        }
+
+        .time-cards-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .time-row-cards {
+            display: flex;
+            gap: 10px;
+        }
+        .time-card-item {
+            flex: 1;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+        .time-card-title {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .time-card-val {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        .time-card-sub {
+            font-size: 12px;
+            color: #D97706;
+            margin-top: 4px;
+            font-weight: bold;
+        }
+
+        .monthly-cal-wrapper {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px;
+        }
+        .monthly-cal-header-bar {
+            background: var(--primary-color);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .monthly-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        .monthly-day-header {
+            background: var(--header-bg);
+            color: white;
+            text-align: center;
+            padding: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+        .monthly-cell {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            min-height: 52px;
+            padding: 4px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .monthly-cell.today {
+            border: 2px solid var(--accent-color);
+            background: var(--bg-color);
+        }
+        .cell-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+        .cell-heb {
+            font-weight: bold;
+            color: var(--primary-color);
+            background: var(--border-color);
+            padding: 1px 5px;
+            border-radius: 3px;
+        }
+        .cell-greg {
+            color: var(--text-secondary);
+            font-weight: bold;
+        }
+        .cell-event {
+            font-size: 10px;
+            color: var(--accent-color);
+            font-weight: bold;
+            margin-top: 2px;
+            text-align: center;
+        }
+        .empty-cell {
+            background: transparent;
+            border: 1px dashed var(--border-color);
+            border-radius: 4px;
+            min-height: 52px;
+        }
+
+        .themes-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 10px;
+        }
+        .theme-card-option {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .theme-card-option:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        .theme-card-option.active {
+            border-color: var(--primary-color);
+            background: var(--bg-color);
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.15);
+        }
+
+        /* עיצוב התראת Toast בסגנון אנדרואיד */
+        #androidToast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: #323232;
+            color: #FFFFFF;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 9999;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+        }
+        #androidToast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        #androidToast.toast-online {
+            background-color: #059669;
+        }
+        #androidToast.toast-offline {
+            background-color: #DC2626;
+        }
+    </style>
+</head>
+<body class="theme-classic">
+
+<!-- רכיב התראת Toast בסגנון אנדרואיד -->
+<div id="androidToast">בודק חיבור רשת...</div>
+
+<div class="app-container">
+
+    <div class="live-clock-bar">
+        <span id="topLiveClock">🕒 שעה: --:--:--</span>
+        <span id="topLiveHebrewDate">📜 עברי: טוען...</span>
+        <span id="topLiveGregorianDate">📅 לועזי: טוען...</span>
+    </div>
+
+    <!-- 0. Login Screen -->
+    <div id="loginScreen" class="screen active">
+        <div class="login-box" style="margin: auto;">
+            <h2 style="color: var(--primary-color); margin-top:0; margin-bottom:4px;">כניסת מנהל בית כנסת</h2>
+            
+            <div id="loginErrorMsg" class="login-error-msg">שם משתמש או סיסמה שגויים!</div>
+
+            <div style="text-align: right;" class="form-group">
+                <label>שם משתמש (אימייל בית הכנסת):</label>
+                <input type="text" id="loginEmail" value="Admin" style="width: 100%; box-sizing: border-box;">
+            </div>
+            
+            <div style="text-align: right;" class="form-group">
+                <label>סיסמה:</label>
+                <input type="password" id="loginPassword" value="123456" style="width: 100%; box-sizing: border-box;">
+            </div>
+
+            <button class="btn" style="margin-top: 6px;" onclick="handleLogin()">התחבר למערכת</button>
+
+            <div class="login-links">
+                <a onclick="openRegisterModal()">יצירת חשבון חדש</a>
+                <a onclick="openForgotModal()">שכחת סיסמה / משתמש?</a>
+            </div>
+
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 8px; font-weight: normal;">
+                © כל הזכויות שמורות 2026 לאבירן א. חיים
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. Main Menu Screen -->
+    <div id="mainMenuScreen" class="screen" style="justify-content: center; align-items: center; text-align: center;">
+        <div>
+            <h1 class="main-title" id="welcomeTitle">לוח מודעות בית כנסת</h1>
+            <div style="width: 280px; margin: 0 auto;">
+                <button class="btn" onclick="startCarousel()">כניסה ללוח מודעות</button>
+                <button class="btn btn-secondary" onclick="openAdmin()" id="adminMenuBtnText">ניהול מערכת לוח</button>
+                <button class="btn" style="background-color: #EF4444; margin-top: 20px;" onclick="confirmLogout()">התנתק ממערכת</button>
+            </div>
+        </div>
+        <div style="font-size: 12px; color: var(--text-secondary); font-weight: normal; margin-bottom: 10px;">
+            © כל הזכויות שמורות 2026 לאבירן א. חיים
+        </div>
+    </div>
+
+    <!-- 2. Carousel Screen -->
+    <div id="carouselScreen" class="screen">
+        <div class="slide-ornament-top">✤ ✡ ✤</div>
+        
+        <div id="dynamicCarouselContainer" style="width:100%; height:100%; position:relative;">
+            <!-- Slide 1: Torah Reading -->
+            <div id="dynSlide_torah" class="carousel-slide" style="display:none; height:100%; flex-direction:column; justify-content:space-between;">
+                <div>
+                    <div class="slide-header">שבת קודש</div>
+                    <div style="text-align:center;"><span class="badge-title" id="lblParasha">פרשת וירא</span></div>
+                </div>
+                <div class="roles-container">
+                    <div class="card-box role-card"><div class="role-title">הוצאת ספר תורה:</div><div class="role-name" id="lblSefer">יהושע</div></div>
+                    <div class="card-box role-card"><div class="role-title">חזן השבת:</div><div class="role-name" id="lblHazan">שמואל</div></div>
+                    <div class="card-box role-card"><div class="role-title">מתרגם:</div><div class="role-name" id="lblMetargem">יששכר</div></div>
+                </div>
+                <div class="aliyot-table">
+                    <div class="aliya-col"><div class="aliya-header">ראשון</div><div class="aliya-body" id="lblAliya1">אברהם</div></div>
+                    <div class="aliya-col"><div class="aliya-header">שני</div><div class="aliya-body" id="lblAliya2">יצחק</div></div>
+                    <div class="aliya-col"><div class="aliya-header">שלישי</div><div class="aliya-body" id="lblAliya3">יעקב</div></div>
+                    <div class="aliya-col"><div class="aliya-header">רביעי</div><div class="aliya-body" id="lblAliya4">משה</div></div>
+                    <div class="aliya-col"><div class="aliya-header">חמישי</div><div class="aliya-body" id="lblAliya5">דוד</div></div>
+                    <div class="aliya-col"><div class="aliya-header">שישי</div><div class="aliya-body" id="lblAliya6">שלמה</div></div>
+                    <div class="aliya-col"><div class="aliya-header">שביעי</div><div class="aliya-body" id="lblAliya7">אהרון</div></div>
+                </div>
+                <div class="times-box">
+                    <div class="time-item">
+                        <div class="time-icon">🕯️</div>
+                        <div class="time-label">מנחה ערב שבת</div>
+                        <div class="time-val" id="lblTimeMinchaErev">16:30</div>
+                    </div>
+                    <div class="time-item">
+                        <div class="time-icon">📖</div>
+                        <div class="time-label">שחרית הודו</div>
+                        <div class="time-val" id="lblTimeShacharitHodud">16:30</div>
+                    </div>
+                    <div class="time-item">
+                        <div class="time-icon">🌅</div>
+                        <div class="time-label">מנחה של שבת</div>
+                        <div class="time-val" id="lblTimeMinchaShabbat">16:30</div>
+                    </div>
+                    <div class="time-item">
+                        <div class="time-icon">🌙</div>
+                        <div class="time-label">ערבית מוצאי שבת</div>
+                        <div class="time-val" id="lblTimeArvitMotzei">16:30</div>
+                    </div>
+                </div>
+                <div class="footer-note">
+                    <span id="lblSynagogueFooter1">בית כנסת</span>
+                    <span>© כל הזכויות שמורות 2026 לאבירן א. חיים</span>
+                    <span>שבת שלום ומבורכת</span>
+                </div>
+            </div>
+
+            <!-- Slide 2: Rosh Chodesh -->
+            <div id="dynSlide_rosh" class="carousel-slide" style="display:none; height:100%; flex-direction:column; justify-content:space-between;">
+                <div class="slide-header" style="font-size: 24px; font-weight: bold; color: var(--primary-color);">🌙 הכרזת ראש חודש</div>
+                <div class="center-card" style="padding: 24px; gap: 10px;">
+                    <h2 style="color: var(--primary-color); font-size: 24px; margin:0;">ראש חודש הבא עלינו לטובה</h2>
+                    <h1 style="color: var(--accent-color); font-size: 36px; margin: 10px 0; font-weight: bold;" id="lblRoshMonthTitle">חודש טבת</h1>
+                    <div style="font-size: 19px; color: var(--text-main); line-height: 1.5; font-weight: 500; margin-top: 5px;">
+                        <span id="lblRoshDeclLine">הכרזת ראש חודש טבת שחל להיות בימים שני ושלישי.</span><br>
+                        <span id="lblRoshTypeLine" style="color: var(--text-secondary); font-size: 17px;">חודש טבת הוא חודש חסר (בן 29 ימים).</span>
+                    </div>
+                    <p style="font-style: italic; margin-top: 15px; font-weight: bold; font-size: 16px; color: var(--primary-color);">
+                        "יחדשהו הקדוש ברוך הוא עלינו ועל כל עמו בית ישראל, לטובה ולברכה, לששון ולשמחה, לישועה ולנחמה."
+                    </p>
+                </div>
+                <div class="footer-note">
+                    <span id="lblSynagogueFooter2">בית כנסת</span>
+                    <span>© כל הזכויות שמורות 2026 לאבירן א. חיים</span>
+                    <span>"וְלִמַּדְתֶּם אֹתָם אֶת בְּנֵי כֶלֶם"</span>
+                </div>
+            </div>
+
+            <!-- Slide 3: Yahrtzeit -->
+            <div id="dynSlide_yahrtzeit" class="carousel-slide" style="display:none; height:100%; flex-direction:column; justify-content:space-between;">
+                <div class="slide-header">🕯️ יארצייט השבוע</div>
+                <div class="center-card">
+                    <div style="font-size: 36px; margin-bottom: 10px;">🕯️</div>
+                    <h1 style="font-size: 30px; color: var(--primary-color); margin: 0 0 10px 0;">יארצייט ואזכרות השבוע</h1>
+                    <div id="lblYahrtzeitListDisplay" style="font-size: 21px; color: var(--text-main); line-height: 1.6; font-weight: bold;"></div>
+                </div>
+                <div class="footer-note">
+                    <span id="lblSynagogueFooter3">בית כנסת</span>
+                    <span>© כל הזכויות שמורות 2026 לאבירן א. חיים</span>
+                    <span>"וְלִמַּדְתֶּם אֹתָם אֶת בְּנֵי כֶלֶם"</span>
+                </div>
+            </div>
+
+            <!-- Slide 4: Special Events -->
+            <div id="dynSlide_events" class="carousel-slide" style="display:none; height:100%; flex-direction:column; justify-content:space-between;">
+                <div class="slide-header">📜 אירועים מיוחדים השבוע</div>
+                <div class="center-card">
+                    <div style="font-size: 36px; margin-bottom: 10px;">📜</div>
+                    <h1 style="font-size: 34px; color: var(--primary-color); margin: 0 0 15px 0;" id="lblEventTitle">שיעור תורה מרכזי</h1>
+                    <div style="font-size: 22px; color: var(--text-main); margin-top: 5px;" id="lblEventDesc">יום חמישי בשעה 20:00 מפי מורינו הרב</div>
+                </div>
+                <div class="footer-note">
+                    <span id="lblSynagogueFooter4">בית כנסת</span>
+                    <span>© כל הזכויות שמורות 2026 לאבירן א. חיים</span>
+                    <span>"וְלִמַּדְתֶּם אֹתָם אֶת בְּנֵי כֶלֶם"</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-slide-control">
+            <button class="glass-btn" onclick="goHome()" title="חזרה לתפריט הראשי (Esc)">
+                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            </button>
+            <div class="glass-divider"></div>
+            <button class="glass-btn" id="pausePlayBtn" onclick="togglePauseCarousel()" title="עצור / המשך">
+                <svg id="pauseIcon" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                <svg id="playIcon" viewBox="0 0 24 24" style="display:none;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            </button>
+            <button class="glass-btn" onclick="manualPrevSlide()" title="שקופית קודמת">
+                <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <div class="slide-dots-indicator" id="slideDotsContainer"></div>
+            <button class="glass-btn" onclick="manualNextSlide()" title="שקופית הבאה">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- 3. Advanced Admin Panel -->
+    <div id="adminScreen" class="screen">
+        <div class="admin-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h2 id="adminPanelHeaderTitle" style="color: var(--primary-color); margin:0;">ניהול מערכת לוח</h2>
+                <div style="font-size: 11px; color: var(--text-secondary); font-weight: normal;">
+                    © כל הזכויות שמורות 2026 לאבירן א. חיים
+                </div>
+            </div>
+            
+            <div class="admin-tabs">
+                <button class="tab-btn active" onclick="switchTab('tabTorah', this)">📖 קריאת תורה</button>
+                <button class="tab-btn" onclick="switchTab('tabRosh', this)">🌙 ראש חודש</button>
+                <button class="tab-btn" onclick="switchTab('tabYahrtzeit', this)">🕯️ יארצייט</button>
+                <button class="tab-btn" onclick="switchTab('tabEvents', this)">📜 אירועים</button>
+                <button class="tab-btn" onclick="switchTab('tabLists', this)">👥 ניהול רשימות</button>
+                <button class="tab-btn" onclick="switchTab('tabCalendar', this)">📅 לוח שנה</button>
+                <button class="tab-btn" onclick="switchTab('tabTimes', this)">🕒 זמנים</button>
+                <button class="tab-btn" onclick="switchTab('tabSlides', this)">🎛️ ניהול שקופיות</button>
+                <button class="tab-btn" onclick="switchTab('tabTheme', this)">🎨 ערכת נושא</button>
+                <button class="tab-btn" onclick="switchTab('tabSettings', this)">⚙️ הגדרות כותרות</button>
+            </div>
+
+            <div id="tabTorah" class="tab-content active">
+                <div class="form-grid">
+                    <div class="form-group full-width" style="background: var(--bg-color); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <label style="margin: 0; font-size: 14px;">בחר פרשת השבוע (עם חלוקה לחומשים):</label>
+                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--accent-color); font-weight: bold;">
+                                <input type="checkbox" id="autoParashaCheckbox" onchange="toggleAutoParasha()" style="width: 16px; height: 16px; cursor: pointer;">
+                                שליפה אוטומטית מ-Hebcal.com
+                            </label>
+                        </div>
+                        <select id="inUnifiedParashaSelect" style="width: 100%; box-sizing: border-box;"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>הוצאת ספר תורה:</label>
+                        <select id="inSeferSelect"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>חזן השבת:</label>
+                        <select id="inHazanSelect"></select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>מתרגם:</label>
+                        <select id="inMetargemSelect"></select>
+                    </div>
+                    <div class="form-group"><label>ראשון:</label><select id="inAliya1" class="aliya-select" onchange="onAliyaChange(0, this.value)"></select></div>
+                    <div class="form-group"><label>שני:</label><select id="inAliya2" class="aliya-select" onchange="onAliyaChange(1, this.value)"></select></div>
+                    <div class="form-group"><label>שלישי:</label><select id="inAliya3" class="aliya-select" onchange="onAliyaChange(2, this.value)"></select></div>
+                    <div class="form-group"><label>רביעי:</label><select id="inAliya4" class="aliya-select" onchange="onAliyaChange(3, this.value)"></select></div>
+                    <div class="form-group"><label>חמישי:</label><select id="inAliya5" class="aliya-select" onchange="onAliyaChange(4, this.value)"></select></div>
+                    <div class="form-group"><label>שישי:</label><select id="inAliya6" class="aliya-select" onchange="onAliyaChange(5, this.value)"></select></div>
+                    <div class="form-group full-width"><label>שביעי:</label><select id="inAliya7" class="aliya-select" onchange="onAliyaChange(6, this.value)"></select></div>
+                </div>
+            </div>
+
+            <div id="tabRosh" class="tab-content">
+                <div class="form-grid">
+                    <div class="form-group full-width" style="background: var(--bg-color); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <label style="margin: 0; font-size: 14px;">הגדרת ראש חודש:</label>
+                            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--accent-color); font-weight: bold;">
+                                <input type="checkbox" id="autoRoshCheckbox" onchange="toggleAutoRosh()" style="width: 16px; height: 16px; cursor: pointer;">
+                                שליפה אוטומטית מ-Hebcal.com (הצגה החל מיום שלישי שלפני שבת מברכין ועד מוצאי שבת)
+                            </label>
+                        </div>
+                        <p style="font-size: 12px; color: var(--text-secondary); margin: 4px 0 0 0;">במצב אוטומטי, המערכת מזהה את שבת מברכין, מעלה את השקופית 3 ימים קודם (ביום שלישי) ומורידה אותה במוצאי שבת.</p>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>בחירת חודש ידנית:</label>
+                        <select id="inRoshSelect" onchange="updateRoshChodeshDisplay()">
+                            <option value="ניסן">ניסן</option><option value="אייר">אייר</option><option value="סיוון">סיוון</option><option value="תמוז">תמוז</option><option value="אב">אב</option><option value="אלול">אלול</option><option value="תשרי">תשרי</option><option value="חשוון">חשוון</option><option value="כסלו">כסלו</option><option value="טבת">טבת</option><option value="שבט">שבט</option><option value="אדר">אדר</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>סוג חודש:</label>
+                        <select id="inRoshType" onchange="updateRoshChodeshDisplay()">
+                            <option value="מלא">מלא (30 יום)</option>
+                            <option value="חסר">חסר (29 יום)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>משך ראש חודש:</label>
+                        <select id="inRoshDaysCount" onchange="updateRoshChodeshDisplay()">
+                            <option value="יומיים">שני ימים (ל' וא')</option>
+                            <option value="יום אחד">יום אחד (א' בלבד)</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>ימי השבוע של ראש חודש (למשל: שני ושלישי):</label>
+                        <input type="text" id="inRoshDaysOfWeek" value="שני ושלישי" oninput="updateRoshChodeshDisplay()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Yahrtzeit -->
+            <div id="tabYahrtzeit" class="tab-content">
+                <div style="background: var(--bg-color); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 14px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--accent-color); font-weight: bold; font-size: 15px;">
+                        <input type="checkbox" id="autoYahrtzeitCheckbox" onchange="toggleAutoYahrtzeit()" style="width: 18px; height: 18px; cursor: pointer;">
+                        שליפה והצגה אוטומטית מול פרשת השבוע (Hebcal)
+                    </label>
+                    <p style="font-size: 12px; color: var(--text-secondary); margin: 4px 0 0 24px;">במצב אוטומטי, השקופית תוצג בקרוסלה אך ורק אם יש אזכרה השבוע התואמת לפרשה, ותוסתר אוטומטית כשאין שמות. ניתן לערוך את הרשימה המלאה תחת לשונית "ניהול רשימות".</p>
+                </div>
+
+                <h3 style="margin:0 0 10px 0; color:var(--primary-color);">תצוגת אזכרות ויארצייט פעילות השבוע</h3>
+                <table class="congregants-table">
+                    <thead><tr><th>חודש</th><th>שם הנפטר/ת</th><th>תאריך פטירה</th><th>שבת אזכרה</th></tr></thead>
+                    <tbody id="yahrtzeitPreviewTableBody"></tbody>
+                </table>
+            </div>
+
+            <!-- Tab Events: סרגל עריכה מעודכן עם אייקונים בסגנון Word -->
+            <div id="tabEvents" class="tab-content">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>כותרת האירוע:</label>
+                        <input type="text" id="inEventTitle" placeholder="רשום את כותרת האירוע...">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>פרטי האירוע / המודעה (עורך טקסט מעוצב):</label>
+                        <div class="editor-toolbar">
+                            <button type="button" class="editor-btn" onclick="formatText('bold')" title="מודגש (Bold)"><b>B</b></button>
+                            <button type="button" class="editor-btn" onclick="formatText('italic')" title="נטוי (Italic)"><i>I</i></button>
+                            <button type="button" class="editor-btn" onclick="formatText('underline')" title="קו תחתון (Underline)"><u>U</u></button>
+                            
+                            <button type="button" class="editor-btn" onclick="formatText('justifyRight')" title="יישור לימין">
+                                <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M0 1h16v2H0V1zm2 4h12v2H2V5zm0 4h12v2H2V9zm0 4h16v2H0v-2z"/></svg>
+                            </button>
+                            <button type="button" class="editor-btn" onclick="formatText('justifyCenter')" title="יישור למרכז">
+                                <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M0 1h16v2H0V1zm2 4h12v2H2V5zm2 4h8v2H4V9zm-2 4h16v2H0v-2z"/></svg>
+                            </button>
+                            <button type="button" class="editor-btn" onclick="formatText('justifyLeft')" title="יישור לשמאל">
+                                <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M0 1h16v2H0V1zm2 4h12v2H2V5zm0 4h12v2H2V9zm0 4h16v2H0v-2z"/></svg>
+                            </button>
+                            
+                            <button type="button" class="editor-btn" onclick="formatText('insertUnorderedList')" title="תבליטים (رשימה)">
+                                <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><circle cx="2" cy="2" r="1.5"/><path d="M5 1h11v2H5V1zm0 4h11v2H5V5zm0 4h11v2H5V9z"/></svg>
+                            </button>
+                            
+                            <!-- בורר גודל טקסט -->
+                            <select class="editor-select" onchange="formatText('fontSize', this.value); this.selectedIndex=0;" title="גודל טקסט">
+                                <option value="" disabled selected>גודל טקסט</option>
+                                <option value="1">קטן מאוד</option>
+                                <option value="2">קטן</option>
+                                <option value="3">רגיל</option>
+                                <option value="4">בינוני</option>
+                                <option value="5">גדול</option>
+                                <option value="6">גדול מאוד</option>
+                                <option value="7">ענק</option>
+                            </select>
+
+                            <!-- בורר צבע טקסט עם אייקון A ופס צבע -->
+                            <div class="color-picker-btn-wrapper" title="צבע טקסט">
+                                <div class="color-icon-container">
+                                    <span class="color-icon-letter">A</span>
+                                    <div class="color-icon-bar" id="eventColorBar"></div>
+                                </div>
+                                <input type="color" id="eventTextColorPicker" onchange="updateColorBarAndFormat('eventColorBar', this.value, 'foreColor')" value="#0F172A">
+                            </div>
+
+                            <button type="button" class="editor-btn" onclick="formatText('removeFormat')" title="נקה עיצוב" style="width: auto; padding: 0 8px; font-size: 12px;">🧹 נקה</button>
+                        </div>
+                        <div id="inEventDesc" class="rich-textarea" contenteditable="true" placeholder="הקלד כאן את פרטי המודעה ושלט בעיצוב שלה..."></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Lists -->
+            <div id="tabLists" class="tab-content">
+                <div class="sub-tabs">
+                    <button class="sub-tab-btn active" onclick="switchSubTab('sub1', this)">1. רשימת מועמדים (עליות)</button>
+                    <button class="sub-tab-btn" onclick="switchSubTab('sub2', this)">2. רשימת מתרגם</button>
+                    <button class="sub-tab-btn" onclick="switchSubTab('sub3', this)">3. הוצאת ספר תורה</button>
+                    <button class="sub-tab-btn" onclick="switchSubTab('sub4', this)">4. רשימת יארצייט</button>
+                    <button class="sub-tab-btn" onclick="switchSubTab('sub5', this)">5. חזן שבת</button>
+                </div>
+
+                <div id="sub1" class="sub-content active">
+                    <div class="import-box">
+                        <p style="font-size: 12px; margin:0 0 6px 0;">ייבוא רשימת מועמדים מקובץ Excel או PDF:</p>
+                        <input type="file" id="fileImportInput1" accept=".xlsx, .xls, .pdf" style="display:none;" onchange="handleFileImport(event, 'congregants')">
+                        <button class="control-btn" style="background:var(--primary-color); color:white;" onclick="document.getElementById('fileImportInput1').click()">בחירת קובץ מועמדים</button>
+                    </div>
+                    <div class="action-bar">
+                        <button class="action-btn-auto" onclick="confirmAutoRotation()">✨ שיבוץ אוטומטי</button>
+                        <button class="action-btn-add" onclick="openAddMemberModal('congregants', 'מועמד לעליות')">+ הוסף מועמד</button>
+                        <button class="action-btn-export" onclick="openExportModal('congregants', 'רשימת מועמדים לעליות')">📤 ייצא רשימה</button>
+                    </div>
+                    <table class="congregants-table"><thead><tr><th>מיקום</th><th>שם פרטי</th><th>שם משפחה</th><th>שם מלא (תצוגה)</th><th>פעולות</th></tr></thead><tbody id="tableBody1"></tbody></table>
+                </div>
+
+                <div id="sub2" class="sub-content">
+                    <div class="import-box">
+                        <p style="font-size: 12px; margin:0 0 6px 0;">ייבוא רשימת מתרגמים מקובץ Excel או PDF:</p>
+                        <input type="file" id="fileImportInput2" accept=".xlsx, .xls, .pdf" style="display:none;" onchange="handleFileImport(event, 'translators')">
+                        <button class="control-btn" style="background:var(--primary-color); color:white;" onclick="document.getElementById('fileImportInput2').click()">בחירת קובץ מתרגמים</button>
+                    </div>
+                    <div class="action-bar">
+                        <button class="action-btn-add" style="flex:2;" onclick="openAddMemberModal('translators', 'מתרגם')">+ הוסף מתרגם חדש</button>
+                        <button class="action-btn-export" style="flex:1;" onclick="openExportModal('translators', 'רשימת מתרגמים')">📤 ייצא רשימה</button>
+                    </div>
+                    <table class="congregants-table"><thead><tr><th>מיקום</th><th>שם פרטי</th><th>שם משפחה</th><th>שם מלא (תצוגה)</th><th>פעולות</th></tr></thead><tbody id="tableBody2"></tbody></table>
+                </div>
+
+                <div id="sub3" class="sub-content">
+                    <div class="import-box">
+                        <p style="font-size: 12px; margin:0 0 6px 0;">ייבוא רשימת מוציאי ס"ת מקובץ Excel או PDF:</p>
+                        <input type="file" id="fileImportInput3" accept=".xlsx, .xls, .pdf" style="display:none;" onchange="handleFileImport(event, 'seferTorah')">
+                        <button class="control-btn" style="background:var(--primary-color); color:white;" onclick="document.getElementById('fileImportInput3').click()">בחירת קובץ הוצאת ס"ת</button>
+                    </div>
+                    <div class="action-bar">
+                        <button class="action-btn-add" style="flex:2;" onclick="openAddMemberModal('seferTorah', 'מוציא ס"ת')">+ הוסף מוציא ס"ת</button>
+                        <button class="action-btn-export" style="flex:1;" onclick="openExportModal('seferTorah', 'רשימת מוציאי ספר תורה')">📤 ייצא רשימה</button>
+                    </div>
+                    <table class="congregants-table"><thead><tr><th>מיקום</th><th>שם פרטי</th><th>שם משפחה</th><th>שם מלא (תצוגה)</th><th>פעולות</th></tr></thead><tbody id="tableBody3"></tbody></table>
+                </div>
+
+                <div id="sub4" class="sub-content">
+                    <div class="import-box">
+                        <p style="font-size: 12px; margin:0 0 6px 0;">ייבוא רשימת יארצייט מקובץ Excel או PDF:</p>
+                        <input type="file" id="fileImportInputYahrtzeit" accept=".xlsx, .xls, .pdf" style="display:none;" onchange="handleYahrtzeitFileImport(event)">
+                        <button class="control-btn" style="background:var(--primary-color); color:white;" onclick="document.getElementById('fileImportInputYahrtzeit').click()">בחירת קובץ יארצייט</button>
+                    </div>
+                    <div class="action-bar">
+                        <button class="action-btn-add" style="flex:2;" onclick="openAddYahrtzeitModal()">+ הוסף יארצייט חדש</button>
+                        <button class="action-btn-export" style="flex:1;" onclick="openExportModal('yahrtzeits', 'רשימת יארצייט')">📤 ייצא רשימה</button>
+                    </div>
+                    <table class="congregants-table">
+                        <thead><tr><th>חודש</th><th>שם הנפטר/ת</th><th>תאריך פטירה</th><th>שבת אזכרה</th><th>פעולות</th></tr></thead>
+                        <tbody id="yahrtzeitTableBody"></tbody>
+                    </table>
+                </div>
+
+                <div id="sub5" class="sub-content">
+                    <div class="import-box">
+                        <p style="font-size: 12px; margin:0 0 6px 0;">ייבוא רשימת חזנים מקובץ Excel או PDF:</p>
+                        <input type="file" id="fileImportInput4" accept=".xlsx, .xls, .pdf" style="display:none;" onchange="handleFileImport(event, 'hazanim')">
+                        <button class="control-btn" style="background:var(--primary-color); color:white;" onclick="document.getElementById('fileImportInput4').click()">בחירת קובץ חזנים</button>
+                    </div>
+                    <div class="action-bar">
+                        <button class="action-btn-add" style="flex:2;" onclick="openAddMemberModal('hazanim', 'חזן')">+ הוסף חזן חדש</button>
+                        <button class="action-btn-export" style="flex:1;" onclick="openExportModal('hazanim', 'רשימת חזנים')">📤 ייצא רשימה</button>
+                    </div>
+                    <table class="congregants-table"><thead><tr><th>מיקום</th><th>שם פרטי</th><th>שם משפחה</th><th>שם מלא (תצוגה)</th><th>פעולות</th></tr></thead><tbody id="tableBody4"></tbody></table>
+                </div>
+            </div>
+
+            <div id="tabCalendar" class="tab-content">
+                <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px;">
+                    <h3 style="color: var(--primary-color); margin-top: 0;">📅 לוח שנה עברי-לועזי מדויק (ה'תשפ"ז)</h3>
+                    
+                    <div class="time-cards-container">
+                        <div class="time-row-cards">
+                            <div class="time-card-item">
+                                <div class="time-card-title">🕒 שעה מדוייקת (זמן אמת)</div>
+                                <div class="time-card-val" id="cardLiveTime">--:--:--</div>
+                            </div>
+                            <div class="time-card-item">
+                                <div class="time-card-title">📅 תאריך לועזי היום</div>
+                                <div class="time-card-val" id="cardGregorianDate">טוען...</div>
+                            </div>
+                        </div>
+
+                        <div class="time-card-item" style="border-top: 3px solid var(--accent-color); background: var(--bg-color);">
+                            <div class="time-card-title">📜 תאריך עברי ואירועי היום מ-Hebcal.com</div>
+                            <div class="time-card-val" style="color: var(--primary-color); font-size: 18px;" id="cardHebrewDate">טוען נתונים מ-Hebcal...</div>
+                            <div class="time-card-sub" id="cardHebrewEvents">חגים ואירועים (Hebcal): טוען...</div>
+                        </div>
+                    </div>
+
+                    <div class="monthly-cal-wrapper">
+                        <div class="monthly-cal-header-bar">
+                            <button class="control-btn" style="padding: 2px 8px; font-size: 14px;" onclick="changeCalendarMonth(-1)">&gt; חודש קודם</button>
+                            <span id="monthlyTitleDisplay">טוען חודש...</span>
+                            <button class="control-btn" style="padding: 2px 8px; font-size: 14px;" onclick="changeCalendarMonth(1)">חודש הבא &lt;</button>
+                        </div>
+                        <div class="monthly-grid">
+                            <div class="monthly-day-header">ראשון</div>
+                            <div class="monthly-day-header">שני</div>
+                            <div class="monthly-day-header">שלישי</div>
+                            <div class="monthly-day-header">רביעי</div>
+                            <div class="monthly-day-header">חמישי</div>
+                            <div class="monthly-day-header">שישי</div>
+                            <div class="monthly-day-header">שבת</div>
+                        </div>
+                        <div class="monthly-grid" id="monthlyDaysGrid" style="margin-top: 4px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tabTimes" class="tab-content">
+                <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
+                    <h3 style="color: var(--primary-color); margin-top: 0; margin-bottom: 6px;">🕒 ניהול זמני תפילות בשקופית שבת קודש</h3>
+                    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">כאן תוכל להגדיר ולשנות את שעות התפילות שיופיעו בשקופית הראשונה של זמני השבת.</p>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>מנחה ערב שבת:</label>
+                            <input type="text" id="inTimeMinchaErev" placeholder="למשל: 16:30">
+                        </div>
+                        <div class="form-group">
+                            <label>שחרית הודו:</label>
+                            <input type="text" id="inTimeShacharitHodud" placeholder="למשל: 16:30">
+                        </div>
+                        <div class="form-group">
+                            <label>מנחה של שבת:</label>
+                            <input type="text" id="inTimeMinchaShabbat" placeholder="למשל: 16:30">
+                        </div>
+                        <div class="form-group">
+                            <label>ערבית מוצאי שבת:</label>
+                            <input type="text" id="inTimeArvitMotzei" placeholder="למשל: 16:30">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tabSlides" class="tab-content">
+                <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                        <h3 style="color: var(--primary-color); margin: 0;">🎛️ ניהול שקופיות קרוסלה (הצגה, הסתרה ומשך זמן)</h3>
+                        <button class="control-btn" style="background:#059669; color:white;" onclick="openAddCustomSlideModal()">+ צור שקופית חדשה</button>
+                    </div>
+                    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;">כאן תוכל לשלוט אילו שקופיות יוצגו, ולקבוע כמה שניות כל שקופית תופיע על המסך.</p>
+
+                    <table class="congregants-table">
+                        <thead>
+                            <tr>
+                                <th>מיקום בקרוסלה</th>
+                                <th>שם השקופית</th>
+                                <th>תפקיד במערכת</th>
+                                <th>משך תצוגה בשניות</th>
+                                <th>סטטוס תצוגה בקרוסלה</th>
+                            </tr>
+                        </thead>
+                        <tbody id="slidesManagementTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tabTheme" class="tab-content">
+                <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
+                    <h3 style="color: var(--primary-color); margin-top: 0;">🎨 בחירת ערכת נושא לעיצוב הלוח</h3>
+                    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">בחר ערכת נושא ויזואלית שתשפיע מיד על כל השקופיות, הצבעים והעיטורים בקרוסלה.</p>
+                    
+                    <div class="themes-grid">
+                        <div class="theme-card-option" id="themeOpt_classic" onclick="setTheme('classic')">
+                            <h4 style="margin: 0 0 6px 0; color: var(--primary-color);">🔵 קלאסי מכובד</h4>
+                            <p style="font-size: 12px; color: var(--text-secondary); margin:0;">עיצוב כחול ממלכתי ונקי, אידיאלי וברור לכל מסך.</p>
+                        </div>
+                        <div class="theme-card-option" id="themeOpt_gold" onclick="setTheme('gold')">
+                            <h4 style="margin: 0 0 6px 0; color: #F59E0B;">⚜️ זהב מלכותי מודרני</h4>
+                            <p style="font-size: 12px; color: var(--text-secondary); margin:0;">רקע כהה מהודר עם מסגרות ועיטורי זהב יוקרתיים.</p>
+                        </div>
+                        <div class="theme-card-option" id="themeOpt_jerusalem" onclick="setTheme('jerusalem')">
+                            <h4 style="margin: 0 0 6px 0; color: #881337;">🏛️ ירושלמי עתיק מעוטר</h4>
+                            <p style="font-size: 12px; color: var(--text-secondary); margin:0;">גווני בורדו-חמרה קלאסיים עם עיטורי כבוד מיוחדים.</p>
+                        </div>
+                        <div class="theme-card-option" id="themeOpt_sky" onclick="setTheme('sky')">
+                            <h4 style="margin: 0 0 6px 0; color: #0369A1;">🌤️ תכלת שמיים הרמוני</h4>
+                            <p style="font-size: 12px; color: var(--text-secondary); margin:0;">גווני תכלת ושלום מאירים ונעימים לעין.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tabSettings" class="tab-content">
+                <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
+                    <h3 style="color: var(--primary-color); margin-top: 0; margin-bottom: 10px;">⚙️ ניהול כותרות ושמות מערכת</h3>
+                    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">כאן תוכל לשנות את שם בית הכנסת שמופיע בכל השקופיות ואת כותרת מסך הניהול.</p>
+                    
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>שם בית הכנסת (מופיע בתחתית השקופיות):</label>
+                            <input type="text" id="inShulDisplayName" placeholder="למשל: בית כנסת [שם הבית כנסת]">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>כותרת מסך ניהול מערכת:</label>
+                            <input type="text" id="inAdminHeaderTitle" placeholder="למשל: ניהול מערכת לוח">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 16px; display: flex; gap: 10px;">
+                <button class="btn btn-secondary" style="width:140px; margin:0;" onclick="confirmCancel()">ביטול</button>
+                <button class="btn" style="background:var(--accent-color); color:#0F172A; flex:1; margin:0;" onclick="saveChangesAndShow()">שמור שינויים והצג בלוח</button>
+                <button class="btn" style="background:#059669; flex:1; margin:0;" onclick="saveChangesOnly()">שמור שינויים</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modals -->
+<div id="registerModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 style="margin:0; color:var(--primary-color);">🏛️ יצירת חשבון מנהל בית כנסת חדש</h3>
+        <div class="form-group"><label>שם בית הכנסת *</label><input type="text" id="regShulName" placeholder="דוגמה: בית כנסת [שם הבית כנסת]"></div>
+        <div class="form-group"><label>אימייל מנהל (שם משתמש) *</label><input type="email" id="regEmail" placeholder="admin@synagogue.com"></div>
+        <div class="form-group"><label>סיסמה זמנית / חדשה *</label><input type="password" id="regPassword" placeholder="******"></div>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="btn" style="background:#059669; margin:0;" onclick="submitRegister()">צור חשבון והתחבר</button>
+            <button class="btn btn-secondary" style="margin:0;" onclick="closeRegisterModal()">ביטול</button>
+        </div>
+    </div>
+</div>
+
+<div id="forgotModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 style="margin:0; color:var(--primary-color);">🔑 שחזור פרטי התחברות</h3>
+        <p style="font-size: 13px; color: var(--text-secondary); margin:0;">הזינו את כתובת האימייל של בית הכנסת, ונשלח אליכם הוראות לאיפוס הסיסמה.</p>
+        <div class="form-group"><label>אימייל בית הכנסת *</label><input type="email" id="forgotEmail" value="Haim@gmail.com"></div>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="btn" style="background:var(--primary-color); margin:0;" onclick="submitForgot()">שלח הוראות שחזור</button>
+            <button class="btn btn-secondary" style="margin:0;" onclick="closeForgotModal()">ביטול</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: יצירת שקופית חדשה מותאמת אישית עם סרגל עריכה מעודכן לאייקונים -->
+<div id="customSlideModal" class="modal-overlay">
+    <div class="modal-box" style="width: 600px;">
+        <h3 style="margin:0; color:var(--primary-color);">✨ יצירת שקופית חדשה מותאמת אישית</h3>
+        
+        <div class="form-group">
+            <label>כותרת השקופית (מוצגת בראש השקופית) *</label>
+            <input type="text" id="customSlideTitle" placeholder="דוגמה: הודעה חשובה לחברי הקהילה">
+        </div>
+
+        <div class="form-group">
+            <label>סוג תוכן מודעה *</label>
+            <select id="customSlideContentType" onchange="toggleContentTypeFields()">
+                <option value="text">טקסט בלבד</option>
+                <option value="image">תמונה / PDF בלבד</option>
+                <option value="both">שילוב טקסט ותמונה יחד</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="groupSlideHeadline">
+            <label>כותרת מודגשת ראשית (אופציונלי)</label>
+            <input type="text" id="customSlideHeadline" placeholder="דוגמה: שיעור הלכה יומי">
+        </div>
+
+        <div class="form-group" id="groupSlideDesc">
+            <label>תוכן / טקסט מפורט (עורך טקסט מעוצב) *</label>
+            <div class="editor-toolbar">
+                <button type="button" class="editor-btn" onclick="formatCustomText('bold')" title="מודגש (Bold)"><b>B</b></button>
+                <button type="button" class="editor-btn" onclick="formatCustomText('italic')" title="נטוי (Italic)"><i>I</i></button>
+                <button type="button" class="editor-btn" onclick="formatCustomText('underline')" title="קו תחתון (Underline)"><u>U</u></button>
+                
+                <button type="button" class="editor-btn" onclick="formatCustomText('justifyRight')" title="יישור לימין">
+                    <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M0 1h16v2H0V1zm2 4h12v2H2V5zm0 4h12v2H2V9zm0 4h16v2H0v-2z"/></svg>
+                </button>
+                <button type="button" class="editor-btn" onclick="formatCustomText('justifyCenter')" title="יישור למרכז">
+                    <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M0 1h16v2H0V1zm2 4h12v2H2V5zm2 4h8v2H4V9zm-2 4h16v2H0v-2z"/></svg>
+                </button>
+                <button type="button" class="editor-btn" onclick="formatCustomText('justifyLeft')" title="יישור לשמאל">
+                    <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M0 1h16v2H0V1zm2 4h12v2H2V5zm0 4h12v2H2V9zm0 4h16v2H0v-2z"/></svg>
+                </button>
+                
+                <button type="button" class="editor-btn" onclick="formatCustomText('insertUnorderedList')" title="תבליטים (רשימה)">
+                    <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><circle cx="2" cy="2" r="1.5"/><path d="M5 1h11v2H5V1zm0 4h11v2H5V5zm0 4h11v2H5V9z"/></svg>
+                </button>
+                
+                <!-- בורר גודל טקסט -->
+                <select class="editor-select" onchange="formatCustomText('fontSize', this.value); this.selectedIndex=0;" title="גודל טקסט">
+                    <option value="" disabled selected>גודל טקסט</option>
+                    <option value="1">קטן מאוד</option>
+                    <option value="2">קטן</option>
+                    <option value="3">רגיל</option>
+                    <option value="4">בינוני</option>
+                    <option value="5">גדול</option>
+                    <option value="6">גדול מאוד</option>
+                    <option value="7">ענק</option>
+                </select>
+
+                <!-- בורר צבע טקסט עם אייקון A ופס צבע -->
+                <div class="color-picker-btn-wrapper" title="צבע טקסט">
+                    <div class="color-icon-container">
+                        <span class="color-icon-letter">A</span>
+                        <div class="color-icon-bar" id="customColorBar"></div>
+                    </div>
+                    <input type="color" id="customTextColorPicker" onchange="updateColorBarAndFormat('customColorBar', this.value, 'foreColorCustom')" value="#0F172A">
+                </div>
+
+                <button type="button" class="editor-btn" onclick="formatCustomText('removeFormat')" title="נקה עיצוב" style="width: auto; padding: 0 8px; font-size: 12px;">🧹 נקה</button>
+            </div>
+            <div id="customSlideDesc" class="rich-textarea" contenteditable="true" placeholder="רשום את פרטי המודעה כאן ושלט בעיצוב שלה..."></div>
+        </div>
+
+        <div class="form-group" id="groupSlideFile" style="display:none;">
+            <label>העלאת קובץ מודעה (תמונה JPG / PNG או קובץ PDF) *</label>
+            <input type="file" id="customSlideFileInput" accept=".jpg, .jpeg, .png, .pdf" onchange="handleSlideFileUpload(event)">
+            <input type="hidden" id="customSlideFileBase64">
+            <div id="fileUploadPreviewName" style="font-size: 12px; color: #059669; margin-top: 4px; font-weight: bold;"></div>
+        </div>
+
+        <div class="form-group" id="groupSlideLayout" style="display:none;">
+            <label>פריסת עיצוב משולבת (טקסט ותמונה יחד) *</label>
+            <select id="customSlideLayoutSelect">
+                <option value="1">פריסה 1: תמונה מימין, טקסט משמאל</option>
+                <option value="2">פריסה 2: תמונה משמאל, טקסט מימין</option>
+                <option value="3">פריסה 3: תמונה למעלה, טקסט מתחתיה</option>
+                <option value="4">פריסה 4: תמונה ברקע מלא, טקסט מעליה</option>
+            </select>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label>מיקום השקופית (סדר הופעה) *</label>
+                <input type="number" id="customSlideOrder" value="5" min="1" max="20">
+            </div>
+            <div class="form-group">
+                <label>משך תצוגה בשניות</label>
+                <input type="number" id="customSlideDuration" value="4" min="1" max="60">
+            </div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="btn" style="background:var(--primary-color); margin:0;" onclick="submitCustomSlide()">+ הוסף שקופית לקרוסלה</button>
+            <button class="btn btn-secondary" style="margin:0;" onclick="closeAddCustomSlideModal()">ביטול</button>
+        </div>
+    </div>
+</div>
+
+<div id="memberModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 id="modalMemberTitle" style="margin:0; color:var(--primary-color);">👤 הוספת שם חדש</h3>
+        <div class="form-group"><label>שם פרטי *</label><input type="text" id="modalFirstName" placeholder="דוגמה: מנחם"></div>
+        <div class="form-group"><label>שם משפחה *</label><input type="text" id="modalLastName" placeholder="דוגמה: שאול"></div>
+        <div class="form-group"><label>מספר מיקום ברשימה *</label><input type="number" id="modalSeatIndex" placeholder="דוגמה: 1"></div>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="btn" style="background:var(--primary-color); margin:0;" onclick="submitNewMember()">+ הוסף לרשימה</button>
+            <button class="btn btn-secondary" style="margin:0;" onclick="closeAddMemberModal()">ביטול</button>
+        </div>
+    </div>
+</div>
+
+<div id="editMemberModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 style="margin:0; color:var(--primary-color);">✏️ עריכת פרטי חבר</h3>
+        <div class="form-group"><label>שם פרטי *</label><input type="text" id="editFirstName"></div>
+        <div class="form-group"><label>שם משפחה *</label><input type="text" id="editLastName"></div>
+        <div class="form-group"><label>מספר מיקום ברשימה *</label><input type="number" id="editSeatIndex"></div>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="btn" style="background:var(--primary-color); margin:0;" onclick="submitEditMember()">שמור שינויים</button>
+            <button class="btn btn-secondary" style="margin:0;" onclick="closeEditMemberModal()">ביטול</button>
+        </div>
+    </div>
+</div>
+
+<div id="editYahrtzeitModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 style="margin:0; color:var(--primary-color);">✏️ עריכת אזכרה / יארצייט</h3>
+        <div class="form-group">
+            <label>חודש פטירה *</label>
+            <select id="editYMonth">
+                <option value="תשרי">תשרי</option><option value="חשוון">חשוון</option><option value="כסלו">כסלו</option><option value="טבת">טבת</option><option value="שבט">שבט</option><option value="אדר">אדר</option><option value="ניסן">ניסן</option><option value="אייר">אייר</option><option value="סיוון">סיוון</option><option value="תמוז">תמוז</option><option value="אב">אב</option><option value="אלול">אלול</option>
+            </select>
+        </div>
+        <div class="form-group"><label>שם הנפטר/ת *</label><input type="text" id="editYName"></div>
+        <div class="form-group"><label>תאריך פטירה (יום ועברי) *</label><input type="text" id="editYDate"></div>
+        <div class="form-group"><label>שבת אזכרה / פרשה *</label><input type="text" id="editYShabbat"></div>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="btn" style="background:var(--primary-color); margin:0;" onclick="submitEditYahrtzeit()">שמור שינויים</button>
+            <button class="btn btn-secondary" style="margin:0;" onclick="closeEditYahrtzeitModal()">ביטול</button>
+        </div>
+    </div>
+</div>
+
+<div id="exportModal" class="modal-overlay">
+    <div class="modal-box" style="text-align: center;">
+        <h3 style="margin:0; color:var(--primary-color);">📤 ייצא רשימה</h3>
+        <p id="exportModalTitle" style="font-size: 14px; color: var(--text-secondary); margin: 5px 0 15px 0;"></p>
+        <p style="font-size: 13px; color: var(--text-main);">בחרו את הפורמט המבוקש להורדה:</p>
+        <div style="display: flex; gap: 12px; justify-content: center; margin-top: 10px;">
+            <button class="btn" style="background: #10B981; margin:0; flex:1;" onclick="exportFile('excel')">📊 הורד Excel</button>
+            <button class="btn" style="background: #EF4444; margin:0; flex:1;" onclick="exportFile('pdf')">📄 הורד PDF</button>
+        </div>
+        <button class="btn btn-secondary" style="margin-top: 10px;" onclick="closeExportModal()">ביטול</button>
+    </div>
+</div>
+
+<div id="yahrtzeitModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 style="margin:0; color:var(--primary-color);">👤 הוספת נפטר חדש</h3>
+        <div class="form-group"><label>שם הנפטר/ת *</label><input type="text" id="modalYName" placeholder="דוגמה: יצחק סאלם בן תמר"></div>
+        <div class="form-group">
+            <label>חודש פטירה *</label>
+            <select id="modalYMonth">
+                <option value="" disabled selected>בחרו חודש עברי</option>
+                <option value="תשרי">תשרי</option><option value="חשוון">חשוון</option><option value="כסלו">כסלו</option><option value="טבת">טבת</option><option value="שבט">שבט</option><option value="אדר">אדר</option><option value="ניסן">ניסן</option><option value="אייר">אייר</option><option value="סיוון">סיוון</option><option value="תמוז">תמוז</option><option value="אב">אב</option><option value="אלול">אלול</option>
+            </select>
+        </div>
+        <div class="form-group"><label>תאריך פטירה (יום ועברי) *</label><input type="text" id="modalYDate" placeholder="דוגמה: ח' תשרי"></div>
+        <div class="form-group"><label>שבת אזכרה / פרשה *</label><input type="text" id="modalYShabbat" placeholder="דוגמה: פרשת וילך - שבת שובה"></div>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="btn" style="background:var(--primary-color); margin:0;" onclick="submitNewYahrtzeit()">+ הוסף לרשימה</button>
+            <button class="btn btn-secondary" style="margin:0;" onclick="closeAddYahrtzeitModal()">ביטול</button>
+        </div>
+    </div>
+</div>
+
+<div id="confirmModal" class="modal-overlay">
+    <div class="modal-box" style="text-align: center;">
+        <h3 id="confirmTitle" style="margin:0; color:var(--primary-color);">⚠️ אישור פעולה</h3>
+        <p id="confirmMessage" style="font-size: 15px; color: var(--text-main); margin: 15px 0;"></p>
+        <div style="display: flex; gap: 12px; justify-content: center; margin-top: 10px;">
+            <button class="btn" id="confirmYesBtn" style="background: #EF4444; margin:0; flex:1;">אישור</button>
+            <button class="btn btn-secondary" style="margin:0; flex:1;" onclick="closeConfirmModal()">ביטול</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const chumashimParashot = {
+        "ספר בראשית": ["פרשת בראשית", "פרשת נח", "פרשת לך לך", "פרשת וירא", "פרשת חיי שרה", "פרשת תולדות", "פרשת ויצא", "פרשת וישלח", "פרשת וישב", "פרשת מקץ", "פרשת ויגש", "פרשת ויחי"],
+        "ספר שמות": ["פרשת שמות", "פרשת וארא", "פרשת בא", "פרשת בשלח", "פרשת יתרו", "פרשת משפטים", "פרשת תרומה", "פרשת תצווה", "פרשת כי תשא", "פרשת ויקהל", "פרשת פקודי"],
+        "ספר ויקרא": ["פרשת ויקרא", "פרשת צו", "פרשת שמיני", "פרשת תזריע", "פרשת מצורע", "פרשת אחרי מות", "פרשת קדושים", "פרשת אמור", "פרשת בהר", "פרשת בחוקתי"],
+        "ספר במדבר": ["פרשת במדבר", "פרשת נשא", "פרשת בהעלותך", "פרשת שלח לך", "פרשת קרח", "פרשת חקת", "פרשת בלק", "פרשת פינחס", "פרשת מטות", "פרשת מסעי"],
+        "ספר דברים": ["פרשת דברים", "פרשת ואתחנן", "פרשת עקב", "פרשת ראה", "פרשת שופטים", "פרשת כי תצא", "פרשת כי תבוא", "פרשת נצבים", "פרשת וילך", "פרשת האזינו", "פרשת זאת הברכה"]
+    };
+
+    const dbSynagogues = {
+        "Admin": {
+            password: "123456",
+            name: "בית כנסת [שם הבית כנסת]",
+            adminTitleText: "ניהול מערכת לוח",
+            theme: "classic",
+            parasha: "פרשת וירא",
+            isAutoParasha: true,
+            isAutoRosh: true,
+            isAutoYahrtzeit: true,
+            
+            slidesConfig: {
+                torah: { name: "שבת קודש וקריאת התורה", active: true, duration: 4, order: 1 },
+                rosh: { name: "הכרזת ראש חודש", active: true, duration: 4, order: 2 },
+                yahrtzeit: { name: "יארצייט ואזכרות השבוע", active: true, duration: 4, order: 3 },
+                events: { name: "אירועים מיוחדים השבוע", active: true, duration: 4, order: 4 }
+            },
+            customSlides: [],
+
+            aliyot: ["אברהם יצחק", "יצחק יעקב", "יעקב משה", "משה דוד", "דוד שלמה", "שלמה אהרון", "אהרון יוסף"],
+            sefer: "יהושע בצלאל",
+            hazan: "שמואל אברהם",
+            metargem: "יששכר חיים",
+            
+            prayerTimes: {
+                minchaErev: "16:30",
+                shacharitHodud: "16:30",
+                minchaShabbat: "16:30",
+                arvitMotzei: "16:30"
+            },
+            
+            roshMonth: "טבת",
+            roshType: "חסר",
+            roshDaysCount: "יומיים",
+            roshDaysOfWeek: "שני ושלישי",
+            isRoshActiveNow: false,
+
+            eventTitle: "שיעור תורה מרכזי",
+            eventDesc: "יום חמישי בשעה 20:00 מפי מורינו הרב",
+            
+            congregants: [
+                {firstName: "אברהם", lastName: "יצחק"}, {firstName: "יצחק", lastName: "יעקב"},
+                {firstName: "יעקב", lastName: "משה"}, {firstName: "משה", lastName: "דוד"},
+                {firstName: "דוד", lastName: "שלמה"}, {firstName: "שלמה", lastName: "אהרון"},
+                {firstName: "אהרון", lastName: "יוסף"}, {firstName: "יוסף", lastName: "בנימין"},
+                {firstName: "בנימין", lastName: "דניאל"}, {firstName: "דניאל", lastName: "מנחם"}
+            ],
+            translators: [{firstName: "יששכר", lastName: "חיים"}, {firstName: "חיים", lastName: "שמעון"}],
+            seferTorah: [{firstName: "יהושע", lastName: "בצלאל"}, {firstName: "בצלאל", lastName: "אריאל"}],
+            hazanim: [{firstName: "שמואל", lastName: "אברהם"}, {firstName: "אברהם", lastName: "מנחם"}],
+
+            yahrtzeits: [
+                {month: "תשרי", name: "יצחק סאלם בן תמר", date: "ח' תשרי", shabbat: "פרשת וילך – שבת שובה"},
+                {month: "חשוון", name: "אליעזר (אלי) אלוני", date: "י\"א חשוון", shabbat: "פרשת לך-לך"},
+                {month: "כסלו", name: "שמואל יעקב בן עובדיה", date: "י\"ז כסלו", shabbat: "פרשת וישלח"}
+            ],
+
+            lastAssignedAliya: 6
+        }
+    };
+
+    // ===== שמירת נתונים קבועה (נשמר גם אחרי סגירת האפליקציה) =====
+    const STORAGE_KEY = 'shulBoardDB_v1';
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            Object.keys(parsed).forEach(k => { dbSynagogues[k] = parsed[k]; });
+        }
+    } catch (e) { console.error('טעינת נתונים שמורים נכשלה', e); }
+
+    function persistDB() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(dbSynagogues)); } catch (e) { console.error('שמירה נכשלה', e); }
+    }
+    setInterval(persistDB, 2000);
+    window.addEventListener('pagehide', persistDB);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) persistDB(); });
+
+    let currentSynagogueKey = null;
+    let currentModalTargetList = null;
+    let editTargetListKey = null;
+    let editTargetIndex = null;
+    let editYahrtzeitIndex = null;
+    let exportTargetKey = null;
+    let exportTargetTitle = '';
+    
+    let activeCarouselSlides = [];
+    let currentCarouselIndex = 0;
+    let carouselTimer = null;
+    let isCarouselPaused = false;
+
+    let calendarCurrentDate = new Date();
+    const hebrewDateFormatter = new Intl.DateTimeFormat('he-u-ca-hebrew', { day: 'numeric', month: 'long' });
+
+    document.addEventListener('keydown', function(event) {
+        const carouselScreen = document.getElementById('carouselScreen');
+        if (carouselScreen && carouselScreen.classList.contains('active')) {
+            if (event.key === 'Escape' || event.key === 'Backspace') {
+                event.preventDefault();
+                goHome();
+            }
+        }
+    });
+
+    function showAndroidToast(message, isOnline) {
+        const toast = document.getElementById('androidToast');
+        toast.innerText = message;
+        toast.className = '';
+        if (isOnline) {
+            toast.classList.add('toast-online');
+        } else {
+            toast.classList.add('toast-offline');
+        }
+        toast.classList.add('show');
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3500);
+    }
+
+    function initNetworkChecker() {
+        const checkConnectionStatus = () => {
+            if (navigator.onLine) {
+                showAndroidToast("יש חיבור לרשת אינטרנט", true);
+            } else {
+                showAndroidToast("אין חיבור לרשת אינטרנט", false);
+            }
+        };
+
+        checkConnectionStatus();
+
+        window.addEventListener('online', () => {
+            showAndroidToast("יש חיבור לרשת אינטרנט", true);
+        });
+        window.addEventListener('offline', () => {
+            showAndroidToast("אין חיבור לרשת אינטרנט", false);
+        });
+    }
+
+    function initLiveClockAndHebcal() {
+        setInterval(() => {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('he-IL');
+            document.getElementById('topLiveClock').innerText = `🕒 שעה: ${timeStr}`;
+            if(document.getElementById('cardLiveTime')) {
+                document.getElementById('cardLiveTime').innerText = timeStr;
+            }
+        }, 1000);
+
+        fetchHebcalData();
+        renderMonthlyCalendar();
+    }
+
+    function fetchHebcalData() {
+        const now = new Date();
+        
+        let dayOfWeek = now.getDay(); 
+        let daysUntilShabbat = (6 - dayOfWeek + 7) % 7; 
+        
+        const targetShabbatDate = new Date(now.getTime() + (daysUntilShabbat * 24 * 60 * 60 * 1000));
+        const tYear = targetShabbatDate.getFullYear();
+        const tMonth = targetShabbatDate.getMonth() + 1;
+        const tDay = targetShabbatDate.getDate();
+
+        const shabbatUrl = `https://www.hebcal.com/shabbat?cfg=json&geonameid=281184&M=on&gy=${tYear}&gm=${tMonth}&gd=${tDay}`;
+        const converterUrl = `https://www.hebcal.com/converter?cfg=json&gy=${now.getFullYear()}&gm=${now.getMonth() + 1}&gd=${now.getDate()}&g2h=1&locale=he`;
+
+        Promise.all([
+            fetch(converterUrl).then(res => res.json()).catch(() => null),
+            fetch(shabbatUrl).then(res => res.json()).catch(() => null)
+        ])
+        .then(([convData, shabbatData]) => {
+            let hebcalParasha = "";
+
+            if (shabbatData && shabbatData.items) {
+                let parashaItem = shabbatData.items.find(item => item.category === 'parashat');
+                if (parashaItem) {
+                    hebcalParasha = parashaItem.hebrew || parashaItem.title || "";
+                }
+            }
+
+            if (hebcalParasha) {
+                hebcalParasha = hebcalParasha.replace(/^פרשת\s+/, '').replace(/^Parashat\s+/, '').trim();
+                hebcalParasha = `פרשת ${hebcalParasha}`;
+            }
+
+            if (convData) {
+                const hebrewDateStr = convData.hebrew || "";
+                const gregorianDateStr = now.toLocaleDateString('he-IL', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+
+                document.getElementById('topLiveHebrewDate').innerText = `📜 עברי: ${hebrewDateStr}`;
+                document.getElementById('topLiveGregorianDate').innerText = `📅 לועזי: ${gregorianDateStr}`;
+
+                if(document.getElementById('cardHebrewDate')) {
+                    document.getElementById('cardHebrewDate').innerText = hebrewDateStr;
+                    document.getElementById('cardGregorianDate').innerText = gregorianDateStr;
+                }
+
+                if (currentSynagogueKey) {
+                    const shul = dbSynagogues[currentSynagogueKey];
+                    shul.isRoshActiveNow = checkIfRoshWindowActive(convData);
+                }
+            }
+
+            if (currentSynagogueKey && hebcalParasha) {
+                const shul = dbSynagogues[currentSynagogueKey];
+                if (shul.isAutoParasha) {
+                    shul.parasha = hebcalParasha;
+                    
+                    const parashaLabel = document.getElementById('lblParasha');
+                    if(parashaLabel) {
+                        parashaLabel.innerText = hebcalParasha;
+                    }
+                    
+                    const parashaSelect = document.getElementById('inUnifiedParashaSelect');
+                    if(parashaSelect) {
+                        parashaSelect.value = hebcalParasha;
+                    }
+
+                    updateYahrtzeitDisplay();
+                }
+            }
+        })
+        .catch(err => {
+            console.error("שגיאה בחיבור ל-Hebcal:", err);
+        });
+    }
+
+    function checkIfRoshWindowActive(data) {
+        let events = data.events || [];
+        let dayOfWeek = new Date().getDay();
+        
+        let isShabbatMevarchim = events.some(ev => ev.includes('מבאר') || ev.includes('מברכין') || ev.includes('מבורך'));
+        let isRoshToday = events.some(ev => ev.includes('ראש חודש'));
+
+        if (isShabbatMevarchim || isRoshToday) {
+            if (dayOfWeek === 0) return false;
+            return true;
+        }
+
+        let hebStr = data.hebrew || "";
+        let isLateInMonth = hebStr.includes('כ') || hebStr.includes('ל') || hebStr.includes('טפ');
+        if (isLateInMonth && (dayOfWeek >= 2 && dayOfWeek <= 5)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function updateRoshChodeshDisplay() {
+        const shul = dbSynagogues[currentSynagogueKey];
+        if(!shul) return;
+
+        const roshMonth = document.getElementById('inRoshSelect') ? document.getElementById('inRoshSelect').value : shul.roshMonth;
+        const roshType = document.getElementById('inRoshType') ? document.getElementById('inRoshType').value : shul.roshType;
+        const roshDaysOfWeek = document.getElementById('inRoshDaysOfWeek') ? document.getElementById('inRoshDaysOfWeek').value : shul.roshDaysOfWeek;
+
+        document.getElementById('lblRoshMonthTitle').innerText = `חודש ${roshMonth}`;
+        document.getElementById('lblRoshDeclLine').innerText = `הכרזת ראש חודש ${roshMonth} שחל להיות בימים ${roshDaysOfWeek}.`;
+        let daysNumText = (roshType === "מלא") ? "30 ימים" : "29 ימים";
+        document.getElementById('lblRoshTypeLine').innerText = `חודש ${roshMonth} הוא חודש ${roshType} (בן ${daysNumText}).`;
+    }
+
+    function renderMonthlyCalendar() {
+        const year = calendarCurrentDate.getFullYear();
+        const month = calendarCurrentDate.getMonth();
+        const secularTitle = calendarCurrentDate.toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
+        
+        const sampleDate = new Date(year, month, 15);
+        let sampleHeb = hebrewDateFormatter.format(sampleDate);
+        let hebMonthName = sampleHeb.replace(/[0-9'",]/g, '').trim().split(' ').pop() || "חשוון";
+
+        document.getElementById('monthlyTitleDisplay').innerHTML = `${hebMonthName} ה'תשפ"ז &nbsp;|&nbsp; <span style="font-size:13px; font-weight:normal;">${secularTitle}</span>`;
+
+        const firstDayIndex = new Date(year, month, 1).getDay(); 
+        const totalDays = new Date(year, month + 1, 0).getDate();
+        
+        const grid = document.getElementById('monthlyDaysGrid');
+        grid.innerHTML = '';
+
+        let dateCounter = 1;
+        const today = new Date();
+
+        for (let i = 0; i < 6; i++) {
+            let addedDaysInRow = 0;
+            let rowHtml = "";
+
+            for (let j = 0; j < 7; j++) {
+                if (i === 0 && j < firstDayIndex) {
+                    rowHtml += `<div class="empty-cell"></div>`;
+                    addedDaysInRow++;
+                } else if (dateCounter > totalDays) {
+                    if (j === 0) break;
+                    rowHtml += `<div class="empty-cell"></div>`;
+                    addedDaysInRow++;
+                } else {
+                    const thisDate = new Date(year, month, dateCounter);
+                    let fullHebStr = hebrewDateFormatter.format(thisDate);
+                    let hebDayLetters = fullHebStr.replace(/[0-9]/g, '').split(' ')[0] || dateCounter;
+
+                    const isToday = (thisDate.toDateString() === today.toDateString()) ? "today" : "";
+
+                    rowHtml += `
+                        <div class="monthly-cell ${isToday}">
+                            <div class="cell-top-row">
+                                <span class="cell-heb">${hebDayLetters}</span>
+                                <span class="cell-greg">${dateCounter}</span>
+                            </div>
+                            <div class="cell-event"></div>
+                        </div>
+                    `;
+                    dateCounter++;
+                    addedDaysInRow++;
+                }
+            }
+            if (addedDaysInRow > 0 && dateCounter <= totalDays + 7) {
+                grid.innerHTML += rowHtml;
+            }
+        }
+    }
+
+    function changeCalendarMonth(direction) {
+        calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + direction);
+        renderMonthlyCalendar();
+    }
+
+    window.onload = function() {
+        initNetworkChecker();
+        initLiveClockAndHebcal();
+    };
+
+    function handleLogin() {
+        const emailInput = document.getElementById('loginEmail').value.trim();
+        const passwordInput = document.getElementById('loginPassword').value.trim();
+        const errorMsg = document.getElementById('loginErrorMsg');
+
+        if (dbSynagogues[emailInput] && dbSynagogues[emailInput].password === passwordInput) {
+            errorMsg.style.display = 'none';
+            currentSynagogueKey = emailInput;
+            const shul = dbSynagogues[emailInput];
+            applyTheme(shul.theme || 'classic');
+            loadDataToUI();
+            showScreen('mainMenuScreen');
+        } else {
+            errorMsg.style.display = 'block';
+        }
+    }
+
+    function confirmLogout() {
+        openConfirmModal("התנתקות מהמערכת", "האם ברצונך להתנתק מהמערכת?", () => {
+            closeConfirmModal();
+            currentSynagogueKey = null;
+            showScreen('loginScreen');
+        });
+    }
+
+    function openRegisterModal() {
+        document.getElementById('regShulName').value = '';
+        document.getElementById('regEmail').value = '';
+        document.getElementById('regPassword').value = '';
+        document.getElementById('registerModal').style.display = 'flex';
+    }
+    function closeRegisterModal() { document.getElementById('registerModal').style.display = 'none'; }
+
+    function submitRegister() {
+        const name = document.getElementById('regShulName').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const pass = document.getElementById('regPassword').value.trim();
+
+        if(!name || !email || !pass) return alert('נא למלא את כל שדות ההרשמה');
+        
+        dbSynagogues[email] = {
+            password: pass,
+            name: name,
+            adminTitleText: "ניהול מערכת לוח",
+            theme: "classic",
+            parasha: "פרשת וירא",
+            isAutoParasha: true,
+            isAutoRosh: true,
+            isAutoYahrtzeit: true,
+            slidesConfig: {
+                torah: { name: "שבת קודש וקריאת התורה", active: true, duration: 4, order: 1 },
+                rosh: { name: "הכרזת ראש חודש", active: true, duration: 4, order: 2 },
+                yahrtzeit: { name: "יארצייט ואזכרות השבוע", active: true, duration: 4, order: 3 },
+                events: { name: "אירועים מיוחדים השבוע", active: true, duration: 4, order: 4 }
+            },
+            customSlides: [],
+            aliyot: ["כהן", "לוי", "ישראל", "רביעי", "חמישי", "שישי", "שביעי"],
+            sefer: "משה",
+            hazan: "דוד",
+            metargem: "שלמה",
+            prayerTimes: { minchaErev: "16:30", shacharitHodud: "16:30", minchaShabbat: "16:30", arvitMotzei: "16:30" },
+            roshMonth: "טבת",
+            roshType: "חסר",
+            roshDaysCount: "יומיים",
+            roshDaysOfWeek: "שני ושלישי",
+            isRoshActiveNow: false,
+            eventTitle: "ברוכים הבאים",
+            eventDesc: "הגדירו פרטים דרך ניהול המערכת",
+            congregants: [{firstName: "אברהם", lastName: "כהן"}],
+            translators: [{firstName: "שלמה", lastName: "מזרחי"}],
+            seferTorah: [{firstName: "משה", lastName: "אברהם"}],
+            hazanim: [{firstName: "דוד", lastName: "כהן"}],
+            yahrtzeits: [],
+            lastAssignedAliya: 0
+        };
+
+        document.getElementById('loginEmail').value = email;
+        document.getElementById('loginPassword').value = pass;
+        closeRegisterModal();
+        alert('החשבון נוצר בהצלחה! מתחבר כעת למערכת...');
+        handleLogin();
+    }
+
+    function openForgotModal() { document.getElementById('forgotModal').style.display = 'flex'; }
+    function closeForgotModal() { document.getElementById('forgotModal').style.display = 'none'; }
+    function submitForgot() {
+        alert('הוראות לאיפוס סיסמה נשלחו לאימייל.');
+        closeForgotModal();
+    }
+
+    function loadDataToUI() {
+        const shul = dbSynagogues[currentSynagogueKey];
+        
+        document.getElementById('welcomeTitle').innerText = shul.name;
+        for(let i=1; i<=4; i++) { 
+            const footerElem = document.getElementById(`lblSynagogueFooter${i}`);
+            if(footerElem) footerElem.innerText = shul.name; 
+        }
+
+        document.getElementById('inShulDisplayName').value = shul.name;
+        document.getElementById('inAdminHeaderTitle').value = shul.adminTitleText || "ניהול מערכת לוח";
+        document.getElementById('adminPanelHeaderTitle').innerText = shul.adminTitleText || "ניהול מערכת לוח";
+        document.getElementById('adminMenuBtnText').innerText = shul.adminTitleText || "ניהול מערכת לוח";
+
+        applyTheme(shul.theme || 'classic');
+
+        document.getElementById('lblParasha').innerText = shul.parasha;
+        document.getElementById('lblSefer').innerText = shul.sefer;
+        document.getElementById('lblHazan').innerText = shul.hazan;
+        document.getElementById('lblMetargem').innerText = shul.metargem;
+        for(let i=0; i<7; i++) {
+            document.getElementById(`lblAliya${i+1}`).innerText = shul.aliyot[i];
+        }
+
+        document.getElementById('lblTimeMinchaErev').innerText = shul.prayerTimes.minchaErev;
+        document.getElementById('lblTimeShacharitHodud').innerText = shul.prayerTimes.shacharitHodud;
+        document.getElementById('lblTimeMinchaShabbat').innerText = shul.prayerTimes.minchaShabbat;
+        document.getElementById('lblTimeArvitMotzei').innerText = shul.prayerTimes.arvitMotzei;
+
+        document.getElementById('inTimeMinchaErev').value = shul.prayerTimes.minchaErev;
+        document.getElementById('inTimeShacharitHodud').value = shul.prayerTimes.shacharitHodud;
+        document.getElementById('inTimeMinchaShabbat').value = shul.prayerTimes.minchaShabbat;
+        document.getElementById('inTimeArvitMotzei').value = shul.prayerTimes.arvitMotzei;
+
+        document.getElementById('inRoshSelect').value = shul.roshMonth;
+        document.getElementById('inRoshType').value = shul.roshType;
+        document.getElementById('inRoshDaysCount').value = shul.roshDaysCount;
+        document.getElementById('inRoshDaysOfWeek').value = shul.roshDaysOfWeek;
+        updateRoshChodeshDisplay();
+
+        document.getElementById('lblEventTitle').innerText = shul.eventTitle || "אירוע שבועי";
+        document.getElementById('lblEventDesc').innerHTML = shul.eventDesc || "";
+        document.getElementById('inEventTitle').value = shul.eventTitle || "";
+        document.getElementById('inEventDesc').innerHTML = shul.eventDesc || "";
+
+        document.getElementById('autoParashaCheckbox').checked = shul.isAutoParasha;
+        document.getElementById('autoRoshCheckbox').checked = shul.isAutoRosh;
+        document.getElementById('autoYahrtzeitCheckbox').checked = shul.isAutoYahrtzeit;
+
+        fillUnifiedParashaSelect(shul.parasha);
+        toggleAutoParasha();
+        toggleAutoRosh();
+        toggleAutoYahrtzeit();
+
+        updateYahrtzeitDisplay();
+        renderAllLists();
+        renderYahrtzeitTable();
+        renderYahrtzeitPreviewTable();
+        renderSlidesManagementTable();
+        populateAllDropdowns();
+    }
+
+    function setTheme(themeName) {
+        if(currentSynagogueKey) {
+            dbSynagogues[currentSynagogueKey].theme = themeName;
+        }
+        applyTheme(themeName);
+    }
+
+    function applyTheme(themeName) {
+        document.body.className = `theme-${themeName}`;
+        ['classic', 'gold', 'jerusalem', 'sky'].forEach(t => {
+            const opt = document.getElementById(`themeOpt_${t}`);
+            if(opt) {
+                if(t === themeName) opt.classList.add('active');
+                else opt.classList.remove('active');
+            }
+        });
+    }
+
+    function toggleAutoParasha() {
+        const isChecked = document.getElementById('autoParashaCheckbox').checked;
+        document.getElementById('inUnifiedParashaSelect').disabled = isChecked;
+        if(currentSynagogueKey) {
+            dbSynagogues[currentSynagogueKey].isAutoParasha = isChecked;
+            if(isChecked) fetchHebcalData();
+        }
+    }
+
+    function toggleAutoRosh() {
+        const isChecked = document.getElementById('autoRoshCheckbox').checked;
+        document.getElementById('inRoshSelect').disabled = isChecked;
+        document.getElementById('inRoshType').disabled = isChecked;
+        document.getElementById('inRoshDaysCount').disabled = isChecked;
+        document.getElementById('inRoshDaysOfWeek').disabled = isChecked;
+
+        if(currentSynagogueKey) {
+            dbSynagogues[currentSynagogueKey].isAutoRosh = isChecked;
+            if(isChecked) fetchHebcalData();
+        }
+    }
+
+    function toggleAutoYahrtzeit() {
+        const isChecked = document.getElementById('autoYahrtzeitCheckbox').checked;
+        if(currentSynagogueKey) {
+            dbSynagogues[currentSynagogueKey].isAutoYahrtzeit = isChecked;
+        }
+    }
+
+    function formatText(command, value = null) {
+        document.execCommand(command, false, value);
+    }
+
+    function formatCustomText(command, value = null) {
+        document.execCommand(command, false, value);
+    }
+
+    function updateColorBarAndFormat(barId, colorVal, commandType) {
+        const barElem = document.getElementById(barId);
+        if(barElem) {
+            barElem.style.backgroundColor = colorVal;
+        }
+        if(commandType === 'foreColor') {
+            document.execCommand('foreColor', false, colorVal);
+        } else if(commandType === 'foreColorCustom') {
+            document.execCommand('foreColor', false, colorVal);
+        }
+    }
+
+    function fillUnifiedParashaSelect(selectedParasha) {
+        const select = document.getElementById('inUnifiedParashaSelect');
+        select.innerHTML = '';
+        for (const [chumash, parashot] of Object.entries(chumashimParashot)) {
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = chumash;
+            parashot.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p;
+                opt.innerText = p;
+                if (p === selectedParasha) opt.selected = true;
+                optgroup.appendChild(opt);
+            });
+            select.appendChild(optgroup);
+        }
+    }
+
+    function renderSlidesManagementTable() {
+        const shul = dbSynagogues[currentSynagogueKey];
+        const tbody = document.getElementById('slidesManagementTableBody');
+        tbody.innerHTML = '';
+
+        const slideNamesMap = {
+            torah: { name: "שבת קודש וקריאת התורה", role: "שקופית מרכזית לשבת" },
+            rosh: { name: "הכרזת ראש חודש", role: "מוצגת אוטומטית מיום שלישי ועד מוצאי שבת מברכין" },
+            yahrtzeit: { name: "יארצייט ואזכרות השבוע", role: "מוצגת אוטומטית רק אם יש אזכרות השבוע לפי הפרשה" },
+            events: { name: "אירועים מיוחדים השבוע", role: "מודעות ושיעורי תורה" }
+        };
+
+        let allSlidesRows = [];
+
+        for (let key in shul.slidesConfig) {
+            let slide = shul.slidesConfig[key];
+            let info = slideNamesMap[key];
+            
+            let isWaiting = false;
+            let waitingHint = "";
+            if (key === 'rosh' && shul.isAutoRosh && !shul.isRoshActiveNow) {
+                isWaiting = true;
+                waitingHint = ` <span style="font-size:11px; color:#D97706; font-weight:normal;">(ממתין לתנאי אוטומטי)</span>`;
+            } else if (key === 'yahrtzeit' && shul.isAutoYahrtzeit) {
+                let hasYahrtzeitThisWeek = shul.yahrtzeits.some(y => y.shabbat.includes(shul.parasha));
+                if (!hasYahrtzeitThisWeek) {
+                    isWaiting = true;
+                    waitingHint = ` <span style="font-size:11px; color:#D97706; font-weight:normal;">(ממתין לתנאי אוטומטי)</span>`;
+                }
+            }
+
+            allSlidesRows.push({
+                type: 'system',
+                key: key,
+                name: info.name + waitingHint,
+                role: info.role,
+                duration: slide.duration || 4,
+                active: slide.active,
+                order: slide.order || 1,
+                isWaiting: isWaiting
+            });
+        }
+
+        shul.customSlides.forEach((cs, idx) => {
+            allSlidesRows.push({
+                type: 'custom',
+                customIndex: idx,
+                name: cs.title + ' (מותאם אישית)',
+                role: 'שקופית מודעה פרטית',
+                duration: cs.duration || 4,
+                active: cs.active,
+                order: cs.order || 5,
+                isWaiting: false
+            });
+        });
+
+        allSlidesRows.sort((a, b) => a.order - b.order);
+
+        allSlidesRows.forEach(row => {
+            let tr = document.createElement('tr');
+            if (row.type === 'system') {
+                tr.innerHTML = `
+                    <td><input type="number" min="1" max="20" value="${row.order}" onchange="updateSlideOrder('${row.key}', this.value)" style="width: 60px; text-align: center;"></td>
+                    <td><b>${row.name}</b></td>
+                    <td><span style="color:var(--text-secondary); font-size:12px;">${row.role}</span></td>
+                    <td><input type="number" min="1" max="60" value="${row.duration}" onchange="updateSlideDuration('${row.key}', this.value)" style="width: 70px; text-align: center;"> שנ'</td>
+                    <td>
+                        <label style="display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;">
+                            <input type="checkbox" ${row.active ? 'checked' : ''} onchange="toggleSlideActive('${row.key}', this.checked)" style="width:18px; height:18px; cursor:pointer;">
+                            <span style="font-weight:bold; color:${row.active ? '#059669' : '#EF4444'};">${row.active ? 'מוצג בקרוסלה' : 'מוסתר'}</span>
+                        </label>
+                    </td>
+                `;
+            } else {
+                let idx = row.customIndex;
+                tr.innerHTML = `
+                    <td><input type="number" min="1" max="20" value="${row.order}" onchange="updateCustomSlideOrder(${idx}, this.value)" style="width: 60px; text-align: center;"></td>
+                    <td><b>${row.name}</b></td>
+                    <td><span style="color:var(--text-secondary); font-size:12px;">${row.role}</span></td>
+                    <td><input type="number" min="1" max="60" value="${row.duration}" onchange="updateCustomSlideDuration(${idx}, this.value)" style="width: 70px; text-align: center;"> שנ'</td>
+                    <td>
+                        <label style="display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;">
+                            <input type="checkbox" ${row.active ? 'checked' : ''} onchange="toggleCustomSlideActive(${idx}, this.checked)" style="width:18px; height:18px; cursor:pointer;">
+                            <span style="font-weight:bold; color:${row.active ? '#059669' : '#EF4444'};">${row.active ? 'מוצג בקרוסלה' : 'מוסתר'}</span>
+                        </label>
+                    </td>
+                `;
+            }
+            tbody.appendChild(tr);
+        });
+    }
+
+    function toggleSlideActive(slideKey, isChecked) {
+        dbSynagogues[currentSynagogueKey].slidesConfig[slideKey].active = isChecked;
+        renderSlidesManagementTable();
+    }
+
+    function updateSlideDuration(slideKey, val) {
+        dbSynagogues[currentSynagogueKey].slidesConfig[slideKey].duration = parseInt(val) || 4;
+    }
+
+    function updateSlideOrder(slideKey, val) {
+        dbSynagogues[currentSynagogueKey].slidesConfig[slideKey].order = parseInt(val) || 1;
+        renderSlidesManagementTable();
+    }
+
+    function toggleCustomSlideActive(index, isChecked) {
+        dbSynagogues[currentSynagogueKey].customSlides[index].active = isChecked;
+        renderSlidesManagementTable();
+    }
+
+    function updateCustomSlideDuration(index, val) {
+        dbSynagogues[currentSynagogueKey].customSlides[index].duration = parseInt(val) || 4;
+    }
+
+    function updateCustomSlideOrder(index, val) {
+        dbSynagogues[currentSynagogueKey].customSlides[index].order = parseInt(val) || 1;
+        renderSlidesManagementTable();
+    }
+
+    function openAddCustomSlideModal() {
+        document.getElementById('customSlideTitle').value = '';
+        document.getElementById('customSlideHeadline').value = '';
+        document.getElementById('customSlideDesc').innerHTML = '';
+        document.getElementById('customSlideContentType').value = 'text';
+        document.getElementById('customSlideFileBase64').value = '';
+        document.getElementById('fileUploadPreviewName').innerText = '';
+        document.getElementById('customSlideDuration').value = '4';
+        document.getElementById('customSlideOrder').value = '5';
+        toggleContentTypeFields();
+        document.getElementById('customSlideModal').style.display = 'flex';
+    }
+    function closeAddCustomSlideModal() { document.getElementById('customSlideModal').style.display = 'none'; }
+
+    function toggleContentTypeFields() {
+        const type = document.getElementById('customSlideContentType').value;
+        const groupHeadline = document.getElementById('groupSlideHeadline');
+        const groupDesc = document.getElementById('groupSlideDesc');
+        const groupFile = document.getElementById('groupSlideFile');
+        const groupLayout = document.getElementById('groupSlideLayout');
+
+        if (type === 'text') {
+            groupHeadline.style.display = 'flex';
+            groupDesc.style.display = 'flex';
+            groupFile.style.display = 'none';
+            groupLayout.style.display = 'none';
+        } else if (type === 'image') {
+            groupHeadline.style.display = 'none';
+            groupDesc.style.display = 'none';
+            groupFile.style.display = 'flex';
+            groupLayout.style.display = 'none';
+        } else if (type === 'both') {
+            groupHeadline.style.display = 'flex';
+            groupDesc.style.display = 'flex';
+            groupFile.style.display = 'flex';
+            groupLayout.style.display = 'flex';
+        }
+    }
+
+    function handleSlideFileUpload(event) {
+        const file = event.target.files[0];
+        if(!file) return;
+        document.getElementById('fileUploadPreviewName').innerText = `קובץ נטען: ${file.name}`;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('customSlideFileBase64').value = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function submitCustomSlide() {
+        const title = document.getElementById('customSlideTitle').value.trim();
+        const contentType = document.getElementById('customSlideContentType').value;
+        const headline = document.getElementById('customSlideHeadline').value.trim();
+        const desc = document.getElementById('customSlideDesc').innerHTML.trim();
+        const fileData = document.getElementById('customSlideFileBase64').value;
+        const layout = document.getElementById('customSlideLayoutSelect').value;
+        const duration = parseInt(document.getElementById('customSlideDuration').value) || 4;
+        const order = parseInt(document.getElementById('customSlideOrder').value) || 5;
+
+        if(!title) return alert('נא למלא כותרת לשקופית');
+        if((contentType === 'text' || contentType === 'both') && !desc) return alert('נא למלא את תוכן הטקסט');
+        if((contentType === 'image' || contentType === 'both') && !fileData) return alert('נא להעלות קובץ תמונה או PDF');
+
+        dbSynagogues[currentSynagogueKey].customSlides.push({
+            title, contentType, headline, desc, fileData, layout, duration, order, active: true
+        });
+
+        closeAddCustomSlideModal();
+        renderSlidesManagementTable();
+        alert('השקופית החדשה נוצרה והתווספה בהצלחה!');
+    }
+
+    function updateYahrtzeitDisplay() {
+        const shul = dbSynagogues[currentSynagogueKey];
+        const container = document.getElementById('lblYahrtzeitListDisplay');
+        container.innerHTML = '';
+        const matched = shul.yahrtzeits.filter(y => y.shabbat.includes(shul.parasha));
+        if(matched.length > 0) {
+            matched.forEach(m => {
+                const div = document.createElement('div');
+                div.innerText = `${m.name} ז"ל (${m.date} - ${m.month})`;
+                container.appendChild(div);
+            });
+        } else {
+            container.innerHTML = `<div>אין אזכרות רשומות ל-${shul.parasha}</div>`;
+        }
+    }
+
+    function renderAllLists() {
+        renderTable('congregants', 'tableBody1');
+        renderTable('translators', 'tableBody2');
+        renderTable('seferTorah', 'tableBody3');
+        renderTable('hazanim', 'tableBody4');
+        renderYahrtzeitTable();
+        renderYahrtzeitPreviewTable();
+    }
+
+    function renderTable(listKey, tbodyId) {
+        const shul = dbSynagogues[currentSynagogueKey];
+        const tbody = document.getElementById(tbodyId);
+        tbody.innerHTML = '';
+
+        shul[listKey].forEach((person, index) => {
+            const fullName = `${person.firstName} ${person.lastName}`;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><b>${index + 1}</b></td>
+                <td>${person.firstName}</td>
+                <td>${person.lastName}</td>
+                <td><b style="color:var(--primary-color);">${fullName}</b></td>
+                <td style="display: flex; gap: 6px; justify-content: center; border: none;">
+                    <button class="control-btn" style="padding: 2px 8px; background: #0284C7; color:white; font-size:12px;" onclick="openEditMemberModal('${listKey}', ${index})">עריכה</button>
+                    <button class="control-btn" style="padding: 2px 8px; background: #EF4444; color:white; font-size:12px;" onclick="confirmRemoveItem('${listKey}', ${index})">מחק</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function openEditMemberModal(listKey, index) {
+        editTargetListKey = listKey;
+        editTargetIndex = index;
+        const shul = dbSynagogues[currentSynagogueKey];
+        const person = shul[listKey][index];
+        document.getElementById('editFirstName').value = person.firstName;
+        document.getElementById('editLastName').value = person.lastName;
+        document.getElementById('editSeatIndex').value = index + 1;
+        document.getElementById('editMemberModal').style.display = 'flex';
+    }
+    function closeEditMemberModal() { document.getElementById('editMemberModal').style.display = 'none'; }
+
+    function submitEditMember() {
+        const newFirst = document.getElementById('editFirstName').value.trim();
+        const newLast = document.getElementById('editLastName').value.trim();
+        const newSeat = parseInt(document.getElementById('editSeatIndex').value) - 1;
+        if(!newFirst || !newLast) return alert('נא למלא שם פרטי ושם משפחה');
+
+        const shul = dbSynagogues[currentSynagogueKey];
+        let list = shul[editTargetListKey];
+        let [removedPerson] = list.splice(editTargetIndex, 1);
+        removedPerson.firstName = newFirst;
+        removedPerson.lastName = newLast;
+
+        if (!isNaN(newSeat) && newSeat >= 0 && newSeat <= list.length) {
+            list.splice(newSeat, 0, removedPerson);
+        } else {
+            list.push(removedPerson);
+        }
+
+        renderAllLists();
+        populateAllDropdowns();
+        closeEditMemberModal();
+    }
+
+    function renderYahrtzeitTable() {
+        const shul = dbSynagogues[currentSynagogueKey];
+        const tbody = document.getElementById('yahrtzeitTableBody');
+        tbody.innerHTML = '';
+        shul.yahrtzeits.forEach((y, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><b>${y.month}</b></td>
+                <td>${y.name}</td>
+                <td>${y.date}</td>
+                <td>${y.shabbat}</td>
+                <td style="display: flex; gap: 6px; justify-content: center; border: none;">
+                    <button class="control-btn" style="padding: 2px 8px; background: #0284C7; color:white; font-size:12px;" onclick="openEditYahrtzeitModal(${index})">עריכה</button>
+                    <button class="control-btn" style="padding: 2px 8px; background: #EF4444; color:white; font-size:12px;" onclick="confirmRemoveYahrtzeit(${index})">מחק</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderYahrtzeitPreviewTable() {
+        const shul = dbSynagogues[currentSynagogueKey];
+        const tbody = document.getElementById('yahrtzeitPreviewTableBody');
+        if(!tbody) return;
+        tbody.innerHTML = '';
+        shul.yahrtzeits.forEach((y) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><b>${y.month}</b></td>
+                <td>${y.name}</td>
+                <td>${y.date}</td>
+                <td>${y.shabbat}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function openEditYahrtzeitModal(index) {
+        const shul = dbSynagogues[currentSynagogueKey];
+        editYahrtzeitIndex = index;
+        const item = shul.yahrtzeits[index];
+        document.getElementById('editYMonth').value = item.month;
+        document.getElementById('editYName').value = item.name;
+        document.getElementById('editYDate').value = item.date;
+        document.getElementById('editYShabbat').value = item.shabbat;
+        document.getElementById('editYahrtzeitModal').style.display = 'flex';
+    }
+    function closeEditYahrtzeitModal() { document.getElementById('editYahrtzeitModal').style.display = 'none'; }
+
+    function submitEditYahrtzeit() {
+        const month = document.getElementById('editYMonth').value;
+        const name = document.getElementById('editYName').value.trim();
+        const date = document.getElementById('editYDate').value.trim();
+        const shabbat = document.getElementById('editYShabbat').value.trim();
+        if(!name || !date || !shabbat) return alert('נא למלא את כל השדות');
+
+        dbSynagogues[currentSynagogueKey].yahrtzeits[editYahrtzeitIndex] = {month, name, date, shabbat};
+        renderAllLists();
+        updateYahrtzeitDisplay();
+        closeEditYahrtzeitModal();
+    }
+
+    function confirmRemoveItem(listKey, index) {
+        openConfirmModal("מחיקת פריט", "האם ברצונך למחוק שם זה מהרשימה?", () => {
+            dbSynagogues[currentSynagogueKey][listKey].splice(index, 1);
+            renderAllLists();
+            populateAllDropdowns();
+            closeConfirmModal();
+        });
+    }
+
+    function handleFileImport(event, listKey) {
+        const file = event.target.files[0];
+        if(!file) return;
+        const fileName = file.name.toLowerCase();
+
+        openConfirmModal("ייבוא קובץ", `האם ברצונך לייבא את השמות מהקובץ ${file.name}?`, () => {
+            closeConfirmModal();
+            if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                    let extracted = [];
+                    json.forEach(row => {
+                        if(row && row[0] && String(row[0]).trim() !== '') {
+                            let fullName = String(row[0]).trim();
+                            let parts = fullName.split(' ');
+                            extracted.push({firstName: parts[0] || '', lastName: parts.slice(1).join(' ') || ''});
+                        }
+                    });
+                    if(extracted.length > 0) {
+                        dbSynagogues[currentSynagogueKey][listKey] = dbSynagogues[currentSynagogueKey][listKey].concat(extracted);
+                        renderAllLists();
+                        populateAllDropdowns();
+                        alert(`נוספו בהצלחה ${extracted.length} שמות!`);
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        });
+    }
+
+    function handleYahrtzeitFileImport(event) {
+        const file = event.target.files[0];
+        if(!file) return;
+        const fileName = file.name.toLowerCase();
+
+        openConfirmModal("ייבוא קובץ יארצייט", `האם ברצונך לייבא אזכרות מהקובץ ${file.name}?`, () => {
+            closeConfirmModal();
+            if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                    let extracted = [];
+                    json.forEach(row => {
+                        if(row && row[0] && String(row[0]).trim() !== '') {
+                            extracted.push({
+                                month: String(row[0] || 'תשרי').trim(),
+                                name: String(row[1] || 'ללא שם').trim(),
+                                date: String(row[2] || 'יום ראשון').trim(),
+                                shabbat: String(row[3] || 'פרשת השבוע').trim()
+                            });
+                        }
+                    });
+                    if(extracted.length > 0) {
+                        dbSynagogues[currentSynagogueKey].yahrtzeits = dbSynagogues[currentSynagogueKey].yahrtzeits.concat(extracted);
+                        renderAllLists();
+                        updateYahrtzeitDisplay();
+                        alert(`נוספו בהצלחה ${extracted.length} אזכרות!`);
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        });
+    }
+
+    function openExportModal(listKey, titleName) {
+        exportTargetKey = listKey;
+        exportTargetTitle = titleName;
+        document.getElementById('exportModalTitle').innerText = titleName;
+        document.getElementById('exportModal').style.display = 'flex';
+    }
+    function closeExportModal() { document.getElementById('exportModal').style.display = 'none'; }
+
+    function exportFile(format) {
+        const shul = dbSynagogues[currentSynagogueKey];
+        const dataList = shul[exportTargetKey];
+        if (!dataList || dataList.length === 0) return alert('היעד ריק.');
+
+        if (format === 'excel') {
+            let exportData = [];
+            if (exportTargetKey === 'yahrtzeits') {
+                exportData = dataList.map((y, idx) => ({"מיקום": idx + 1, "חודש": y.month, "שם הנפטר": y.name, "תאריך": y.date, "שבת אזכרה": y.shabbat}));
+            } else {
+                exportData = dataList.map((p, idx) => ({"מיקום": idx + 1, "שם פרטי": p.firstName, "שם משפחה": p.lastName}));
+            }
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "רשימה");
+            if (window.AndroidBridge) {
+                const b64 = XLSX.write(workbook, {bookType: 'xlsx', type: 'base64'});
+                window.AndroidBridge.saveFile(`${exportTargetTitle}.xlsx`, b64, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            } else {
+                XLSX.writeFile(workbook, `${exportTargetTitle}.xlsx`);
+            }
+        } else {
+            let contentText = `${exportTargetTitle} - ${shul.name}\n\n`;
+            dataList.forEach((p, idx) => {
+                if (exportTargetKey === 'yahrtzeits') {
+                    contentText += `${idx + 1}. ${p.name} | ${p.month} - ${p.date} | ${p.shabbat}\n`;
+                } else {
+                    contentText += `${idx + 1}. ${p.firstName} ${p.lastName}\n`;
+                }
+            });
+            if (window.AndroidBridge) {
+                const b64 = btoa(unescape(encodeURIComponent(contentText)));
+                window.AndroidBridge.saveFile(`${exportTargetTitle}.txt`, b64, 'text/plain');
+                closeExportModal();
+                return;
+            }
+            let blob = new Blob([contentText], { type: 'text/plain;charset=utf-8' });
+            let link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${exportTargetTitle}.txt`;
+            link.click();
+        }
+        closeExportModal();
+    }
+
+    function openAddMemberModal(listKey, titleName) {
+        currentModalTargetList = listKey;
+        document.getElementById('modalMemberTitle').innerText = `👤 הוספת ${titleName} חדש`;
+        document.getElementById('modalFirstName').value = '';
+        document.getElementById('modalLastName').value = '';
+        document.getElementById('modalSeatIndex').value = dbSynagogues[currentSynagogueKey][listKey].length + 1;
+        document.getElementById('memberModal').style.display = 'flex';
+    }
+    function closeAddMemberModal() { document.getElementById('memberModal').style.display = 'none'; }
+
+    function submitNewMember() {
+        const firstName = document.getElementById('modalFirstName').value.trim();
+        const lastName = document.getElementById('modalLastName').value.trim();
+        const seatIdx = parseInt(document.getElementById('modalSeatIndex').value) - 1;
+        if(!firstName || !lastName) return alert('נא למלא שם פרטי ושם משפחה');
+
+        const list = dbSynagogues[currentSynagogueKey][currentModalTargetList];
+        const newPerson = {firstName, lastName};
+        if (!isNaN(seatIdx) && seatIdx >= 0 && seatIdx <= list.length) {
+            list.splice(seatIdx, 0, newPerson);
+        } else {
+            list.push(newPerson);
+        }
+        renderAllLists();
+        populateAllDropdowns();
+        closeAddMemberModal();
+    }
+
+    function confirmRemoveYahrtzeit(index) {
+        openConfirmModal("מחיקת יארצייט", "האם ברצונך למחוק אזכרה זו?", () => {
+            dbSynagogues[currentSynagogueKey].yahrtzeits.splice(index, 1);
+            renderAllLists();
+            updateYahrtzeitDisplay();
+            closeConfirmModal();
+        });
+    }
+
+    function openAddYahrtzeitModal() {
+        document.getElementById('yahrtzeitModal').style.display = 'flex';
+    }
+    function closeAddYahrtzeitModal() { document.getElementById('yahrtzeitModal').style.display = 'none'; }
+    
+    function submitNewYahrtzeit() {
+        const name = document.getElementById('modalYName').value.trim();
+        const month = document.getElementById('modalYMonth').value;
+        const date = document.getElementById('modalYDate').value.trim();
+        const shabbat = document.getElementById('modalYShabbat').value.trim();
+        if(!name || !month || !date || !shabbat) return alert('נא למלא את כל השדות');
+        dbSynagogues[currentSynagogueKey].yahrtzeits.push({month, name, date, shabbat});
+        renderAllLists();
+        updateYahrtzeitDisplay();
+        closeAddYahrtzeitModal();
+    }
+
+    function populateAllDropdowns() {
+        const shul = dbSynagogues[currentSynagogueKey];
+        fillSelectObject('inSeferSelect', shul.seferTorah, shul.sefer);
+        fillSelectObject('inHazanSelect', shul.hazanim, shul.hazan);
+        fillSelectObject('inMetargemSelect', shul.translators, shul.metargem);
+        updateAliyaDropdowns();
+    }
+
+    function fillSelectObject(selectId, itemsArray, selectedValue) {
+        const select = document.getElementById(selectId);
+        select.innerHTML = '';
+        itemsArray.forEach(person => {
+            const fullName = `${person.firstName} ${person.lastName}`.trim();
+            const opt = document.createElement('option');
+            opt.value = fullName;
+            opt.innerText = fullName;
+            if(fullName === selectedValue) opt.selected = true;
+            select.appendChild(opt);
+        });
+    }
+
+    function onAliyaChange(index, selectedValue) {
+        const shul = dbSynagogues[currentSynagogueKey];
+        if(!shul) return;
+        shul.aliyot[index] = selectedValue;
+        updateAliyaDropdowns();
+    }
+
+    function updateAliyaDropdowns() {
+        const shul = dbSynagogues[currentSynagogueKey];
+        if(!shul) return;
+        const selects = document.querySelectorAll('.aliya-select');
+
+        selects.forEach((select, idx) => {
+            const currentValue = shul.aliyot[idx] || "";
+            select.innerHTML = '<option value="">-- בחר מועמד --</option>';
+            
+            shul.congregants.forEach(person => {
+                const fullName = `${person.firstName} ${person.lastName}`.trim();
+                const isSelectedElsewhere = shul.aliyot.some((val, i) => i !== idx && val === fullName && val !== "");
+                
+                if (!isSelectedElsewhere) {
+                    const opt = document.createElement('option');
+                    opt.value = fullName;
+                    opt.innerText = fullName;
+                    if(fullName === currentValue) opt.selected = true;
+                    select.appendChild(opt);
+                }
+            });
+            select.value = currentValue;
+        });
+    }
+
+    function confirmAutoRotation() {
+        openConfirmModal("שיבוץ אוטומטי", "האם להריץ שיבוץ אוטומטי חדש לעליות?", () => {
+            closeConfirmModal();
+            runAutoRotation();
+        });
+    }
+
+    function runAutoRotation() {
+        const shul = dbSynagogues[currentSynagogueKey];
+        const total = shul.congregants.length;
+        if(total < 7) return alert('יש להזין לפחות 7 מועמדים ברשימה!');
+
+        let newaliyot = [];
+        let startIndex = shul.lastAssignedAliya;
+        for(let i = 1; i <= 7; i++) {
+            let nextIdx = (startIndex + i) % total;
+            const p = shul.congregants[nextIdx];
+            newaliyot.push(`${p.firstName} ${p.lastName}`);
+        }
+        for(let i = 0; i < 7; i++) { shul.aliyot[i] = newaliyot[i]; }
+        shul.lastAssignedAliya = (startIndex + 7) % total;
+
+        populateAllDropdowns();
+        alert('השיבוץ האוטומטי לעליות בוצע בהצלחה!');
+        switchTabManually('tabTorah');
+    }
+
+    function switchSubTab(subId, btnElement) {
+        document.querySelectorAll('.sub-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(subId).classList.add('active');
+        btnElement.classList.add('active');
+    }
+
+    function showScreen(screenId) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(screenId).classList.add('active'); }
+    
+    function switchTab(tabId, btnElement) { 
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); 
+        if (btnElement) {
+            btnElement.classList.add('active');
+        } else {
+            const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+            if (btn) btn.classList.add('active');
+        }
+        document.getElementById(tabId).classList.add('active'); 
+    }
+    
+    function switchTabManually(tabId) { 
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); 
+        const targetBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+        if(targetBtn) targetBtn.classList.add('active');
+        document.getElementById(tabId).classList.add('active'); 
+    }
+
+    function startCarousel() {
+        showScreen('carouselScreen');
+        buildActiveSlidesList();
+        
+        if (activeCarouselSlides.length === 0) {
+            alert('אין שקופיות פעילות להצגה! אנא הפעל לפחות שקופית אחת בלשונית ניהול שקופיות.');
+            openAdmin();
+            return;
+        }
+
+        currentCarouselIndex = 0;
+        isCarouselPaused = false;
+        updatePausePlayIcons();
+        updateCarouselDisplay();
+        scheduleNextSlide();
+    }
+
+    function scheduleNextSlide() {
+        if (carouselTimer) clearTimeout(carouselTimer);
+        if (isCarouselPaused) return;
+
+        const shul = dbSynagogues[currentSynagogueKey];
+        if (!shul || activeCarouselSlides.length === 0) return;
+
+        let currentItem = activeCarouselSlides[currentCarouselIndex];
+        let durationSec = 4;
+
+        if (currentItem.key && shul.slidesConfig[currentItem.key]) {
+            durationSec = shul.slidesConfig[currentItem.key].duration || 4;
+        } else if (currentItem.isCustom && shul.customSlides[currentItem.customIndex]) {
+            durationSec = shul.customSlides[currentItem.customIndex].duration || 4;
+        }
+
+        carouselTimer = setTimeout(() => {
+            currentCarouselIndex = (currentCarouselIndex + 1) % activeCarouselSlides.length;
+            updateCarouselDisplay();
+            scheduleNextSlide();
+        }, durationSec * 1000);
+    }
+
+    function togglePauseCarousel() {
+        isCarouselPaused = !isCarouselPaused;
+        updatePausePlayIcons();
+
+        if (isCarouselPaused) {
+            if (carouselTimer) clearTimeout(carouselTimer);
+        } else {
+            scheduleNextSlide();
+        }
+    }
+
+    function updatePausePlayIcons() {
+        const pauseIcon = document.getElementById('pauseIcon');
+        const playIcon = document.getElementById('playIcon');
+        if (isCarouselPaused) {
+            pauseIcon.style.display = 'none';
+            playIcon.style.display = 'block';
+        } else {
+            pauseIcon.style.display = 'block';
+            playIcon.style.display = 'none';
+        }
+    }
+
+    function manualNextSlide() {
+        if (activeCarouselSlides.length === 0) return;
+        currentCarouselIndex = (currentCarouselIndex + 1) % activeCarouselSlides.length;
+        updateCarouselDisplay();
+        if (!isCarouselPaused) scheduleNextSlide();
+    }
+
+    function manualPrevSlide() {
+        if (activeCarouselSlides.length === 0) return;
+        currentCarouselIndex = (currentCarouselIndex - 1 + activeCarouselSlides.length) % activeCarouselSlides.length;
+        updateCarouselDisplay();
+        if (!isCarouselPaused) scheduleNextSlide();
+    }
+
+    function jumpToSlide(index) {
+        if (index < 0 || index >= activeCarouselSlides.length) return;
+        currentCarouselIndex = index;
+        updateCarouselDisplay();
+        if (!isCarouselPaused) scheduleNextSlide();
+    }
+
+    function buildActiveSlidesList() {
+        const shul = dbSynagogues[currentSynagogueKey];
+        let unsortedSlides = [];
+
+        if (shul.slidesConfig.torah.active) unsortedSlides.push({ id: 'dynSlide_torah', key: 'torah', order: shul.slidesConfig.torah.order || 1 });
+        if (shul.slidesConfig.rosh.active && shul.isRoshActiveNow) unsortedSlides.push({ id: 'dynSlide_rosh', key: 'rosh', order: shul.slidesConfig.rosh.order || 2 });
+        
+        let hasYahrtzeitThisWeek = shul.yahrtzeits.some(y => y.shabbat.includes(shul.parasha));
+        if (shul.slidesConfig.yahrtzeit.active) {
+            if (!shul.isAutoYahrtzeit || hasYahrtzeitThisWeek) {
+                unsortedSlides.push({ id: 'dynSlide_yahrtzeit', key: 'yahrtzeit', order: shul.slidesConfig.yahrtzeit.order || 3 });
+            }
+        }
+
+        if (shul.slidesConfig.events.active) unsortedSlides.push({ id: 'dynSlide_events', key: 'events', order: shul.slidesConfig.events.order || 4 });
+
+        shul.customSlides.forEach((cs, idx) => {
+            if(cs.active) {
+                let customElemId = `dynSlide_custom_${idx}`;
+                let elem = document.getElementById(customElemId);
+                if(!elem) {
+                    elem = document.createElement('div');
+                    elem.id = customElemId;
+                    elem.className = 'carousel-slide';
+                    elem.style.cssText = "display:none; height:100%; flex-direction:column; justify-content:space-between; position:relative;";
+                    document.getElementById('dynamicCarouselContainer').appendChild(elem);
+                }
+
+                let innerHtmlContent = '';
+                let headlineHtml = cs.headline ? `<h1 style="font-size: 30px; color: var(--primary-color); margin: 0 0 10px 0; font-weight: bold;">${cs.headline}</h1>` : '';
+                let textHtml = `<div style="font-size: 20px; color: var(--text-main); line-height: 1.5;">${cs.desc}</div>`;
+                let imageHtml = cs.fileData ? `<img src="${cs.fileData}" style="max-width:100%; max-height:280px; object-fit:contain; border-radius:12px; border:1px solid var(--border-color);" />` : '';
+
+                if (cs.contentType === 'text') {
+                    innerHtmlContent = `
+                        <div class="slide-ornament-top">✤ ✡ ✤</div>
+                        <div class="slide-header">📜 ${cs.title}</div>
+                        <div class="center-card">
+                            ${headlineHtml}
+                            ${textHtml}
+                        </div>
+                    `;
+                } else if (cs.contentType === 'image') {
+                    innerHtmlContent = `
+                        <div class="slide-ornament-top">✤ ✡ ✤</div>
+                        <div class="slide-header">📜 ${cs.title}</div>
+                        <div class="center-card" style="padding: 10px;">
+                            ${imageHtml}
+                        </div>
+                    `;
+                } else if (cs.contentType === 'both') {
+                    let innerFlex = "";
+                    if (cs.layout === '1') {
+                        innerFlex = `display: flex; flex-direction: row; align-items: center; gap: 24px; width: 100%; height: 100%;`;
+                        innerHtmlContent = `
+                            <div class="slide-ornament-top">✤ ✡ ✤</div>
+                            <div class="slide-header">📜 ${cs.title}</div>
+                            <div class="center-card" style="padding: 20px;">
+                                <div style="${innerFlex}">
+                                    <div style="flex: 1; text-align: center;">${imageHtml}</div>
+                                    <div style="flex: 1; text-align: right;">${headlineHtml}${textHtml}</div>
+                                </div>
+                            </div>
+                        `;
+                    } else if (cs.layout === '2') {
+                        innerFlex = `display: flex; flex-direction: row-reverse; align-items: center; gap: 24px; width: 100%; height: 100%;`;
+                        innerHtmlContent = `
+                            <div class="slide-ornament-top">✤ ✡ ✤</div>
+                            <div class="slide-header">📜 ${cs.title}</div>
+                            <div class="center-card" style="padding: 20px;">
+                                <div style="${innerFlex}">
+                                    <div style="flex: 1; text-align: center;">${imageHtml}</div>
+                                    <div style="flex: 1; text-align: right;">${headlineHtml}${textHtml}</div>
+                                </div>
+                            </div>
+                        `;
+                    } else if (cs.layout === '3') {
+                        innerHtmlContent = `
+                            <div class="slide-ornament-top">✤ ✡ ✤</div>
+                            <div class="slide-header">📜 ${cs.title}</div>
+                            <div class="center-card" style="padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 14px;">
+                                <div>${imageHtml}</div>
+                                <div style="text-align: center;">${headlineHtml}${textHtml}</div>
+                            </div>
+                        `;
+                    } else {
+                        innerHtmlContent = `
+                            <div class="slide-ornament-top">✤ ✡ ✤</div>
+                            <div class="slide-header">📜 ${cs.title}</div>
+                            <div class="center-card" style="position: relative; overflow: hidden; padding: 30px;">
+                                <div style="position: absolute; top:0; left:0; width:100%; height:100%; background: url('${cs.fileData}') center/cover no-repeat; opacity: 0.15; z-index: 1;"></div>
+                                <div style="position: relative; z-index: 2; text-align: center;">
+                                    ${headlineHtml}
+                                    ${textHtml}
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+
+                elem.innerHTML = `
+                    ${innerHtmlContent}
+                    <div class="footer-note">
+                        <span>${shul.name}</span>
+                        <span>© כל הזכויות שמורות 2026 לאבירן א. חיים</span>
+                        <span>"וְלִמַּדְתֶּם אֹתָם אֶת בְּנֵי כֶלֶם"</span>
+                    </div>
+                `;
+
+                unsortedSlides.push({ id: customElemId, isCustom: true, customIndex: idx, order: cs.order || 5 });
+            }
+        });
+
+        unsortedSlides.sort((a, b) => a.order - b.order);
+        activeCarouselSlides = unsortedSlides;
+
+        renderSlideDots();
+    }
+
+    function renderSlideDots() {
+        const dotsContainer = document.getElementById('slideDotsContainer');
+        dotsContainer.innerHTML = '';
+        activeCarouselSlides.forEach((slide, idx) => {
+            const dot = document.createElement('div');
+            dot.className = `slide-dot-item ${idx === currentCarouselIndex ? 'active' : ''}`;
+            dot.title = `מעבר לשקופית ${idx + 1}`;
+            dot.onclick = () => jumpToSlide(idx);
+            dotsContainer.appendChild(dot);
+        });
+    }
+
+    function updateCarouselDisplay() {
+        document.querySelectorAll('.carousel-slide').forEach(s => s.style.display = 'none');
+        if (activeCarouselSlides.length > 0) {
+            let activeItem = activeCarouselSlides[currentCarouselIndex];
+            let targetElem = document.getElementById(activeItem.id);
+            if(targetElem) targetElem.style.display = 'flex';
+        }
+        renderSlideDots();
+    }
+
+    function openAdmin() { 
+        if (carouselTimer) clearTimeout(carouselTimer); 
+        showScreen('adminScreen');
+    }
+    
+    function confirmCancel() {
+        openConfirmModal("ביטול שינויים", "האם ברצונך לצאת מבלי לשמור את השינויים שביצעת?", () => {
+            closeConfirmModal();
+            loadDataToUI();
+            goHome();
+        });
+    }
+
+    function goHome() { 
+        if (carouselTimer) clearTimeout(carouselTimer); 
+        showScreen('mainMenuScreen'); 
+    }
+
+    function collectFormData() {
+        const shul = dbSynagogues[currentSynagogueKey];
+        shul.name = document.getElementById('inShulDisplayName').value.trim() || shul.name;
+        shul.adminTitleText = document.getElementById('inAdminHeaderTitle').value.trim() || "ניהול מערכת לוח";
+
+        document.getElementById('welcomeTitle').innerText = shul.name;
+        document.getElementById('adminPanelHeaderTitle').innerText = shul.adminTitleText;
+        document.getElementById('adminMenuBtnText').innerText = shul.adminTitleText;
+        for(let i=1; i<=4; i++) { 
+            const fElem = document.getElementById(`lblSynagogueFooter${i}`);
+            if(fElem) fElem.innerText = shul.name; 
+        }
+
+        shul.isAutoParasha = document.getElementById('autoParashaCheckbox').checked;
+        shul.isAutoRosh = document.getElementById('autoRoshCheckbox').checked;
+        shul.isAutoYahrtzeit = document.getElementById('autoYahrtzeitCheckbox').checked;
+        
+        if (!shul.isAutoParasha) {
+            shul.parasha = document.getElementById('inUnifiedParashaSelect').value;
+        }
+
+        if (!shul.isAutoRosh) {
+            shul.roshMonth = document.getElementById('inRoshSelect').value;
+            shul.roshType = document.getElementById('inRoshType').value;
+            shul.roshDaysCount = document.getElementById('inRoshDaysCount').value;
+            shul.roshDaysOfWeek = document.getElementById('inRoshDaysOfWeek').value;
+        }
+
+        shul.sefer = document.getElementById('inSeferSelect').value;
+        shul.hazan = document.getElementById('inHazanSelect').value;
+        shul.metargem = document.getElementById('inMetargemSelect').value;
+        for(let i=0; i<7; i++) { shul.aliyot[i] = document.getElementById(`inAliya${i+1}`).value; }
+
+        shul.prayerTimes.minchaErev = document.getElementById('inTimeMinchaErev').value;
+        shul.prayerTimes.shacharitHodud = document.getElementById('inTimeShacharitHodud').value;
+        shul.prayerTimes.minchaShabbat = document.getElementById('inTimeMinchaShabbat').value;
+        shul.prayerTimes.arvitMotzei = document.getElementById('inTimeArvitMotzei').value;
+
+        shul.eventTitle = document.getElementById('inEventTitle').value;
+        shul.eventDesc = document.getElementById('inEventDesc').innerHTML;
+
+        updateRoshChodeshDisplay();
+    }
+
+    function saveChangesOnly() {
+        collectFormData();
+        loadDataToUI();
+        alert("השינויים נשמרו בהצלחה במערכת!");
+    }
+
+    function saveChangesAndShow() {
+        collectFormData();
+        loadDataToUI();
+        alert("השינויים נשמרו בהצלחה ועודכנו בלוח!");
+        startCarousel();
+    }
+
+    function openConfirmModal(title, message, onConfirmCallback) {
+        document.getElementById('confirmTitle').innerText = title;
+        document.getElementById('confirmMessage').innerText = message;
+        const yesBtn = document.getElementById('confirmYesBtn');
+        yesBtn.onclick = onConfirmCallback;
+        document.getElementById('confirmModal').style.display = 'flex';
+    }
+    function closeConfirmModal() { document.getElementById('confirmModal').style.display = 'none'; }
+</script>
+
+</body>
+</html>
