@@ -98,12 +98,46 @@
         .live-clock-bar {
             background: var(--header-bg);
             color: white;
-            padding: 8px 24px;
+            height: 37px;
+            box-sizing: border-box;
+            padding: 0 18px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 14px;
             font-size: 14px;
             font-weight: bold;
+            overflow: hidden;
+            white-space: nowrap;
+            border-bottom: 2px solid var(--accent-color);
+        }
+        .lcb-group { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .lcb-clock {
+            font-variant-numeric: tabular-nums;
+            font-size: 17px;
+            letter-spacing: 1px;
+            color: var(--accent-color);
+            direction: ltr;
+        }
+        .lcb-hebrew { font-size: 15px; }
+        .lcb-greg { opacity: 0.75; font-weight: normal; font-size: 13px; }
+        .lcb-sep { opacity: 0.35; }
+        .lcb-chip {
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 999px;
+            padding: 2px 10px;
+            font-size: 12.5px;
+            font-weight: bold;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .lcb-chip.hot { background: var(--accent-color); color: #0F172A; border-color: transparent; }
+        @media (max-width: 820px) { .lcb-chip, .lcb-greg, .lcb-sep { display: none; } }
+
+        .btn:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible {
+            outline: 3px solid var(--accent-color);
+            outline-offset: 2px;
         }
 
         .screen {
@@ -942,6 +976,361 @@
         #androidToast.toast-offline {
             background-color: #DC2626;
         }
+
+        /* ===== גופן Assistant מקומי (עובד גם בלי אינטרנט) ===== */
+@font-face {
+  font-family: 'Assistant';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fonts/assistant-hebrew-400-normal.woff2) format('woff2');
+  unicode-range: U+0307-0308,U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F;
+}
+@font-face {
+  font-family: 'Assistant';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(fonts/assistant-latin-400-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Assistant';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fonts/assistant-hebrew-600-normal.woff2) format('woff2');
+  unicode-range: U+0307-0308,U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F;
+}
+@font-face {
+  font-family: 'Assistant';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url(fonts/assistant-latin-600-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Assistant';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fonts/assistant-hebrew-700-normal.woff2) format('woff2');
+  unicode-range: U+0307-0308,U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F;
+}
+@font-face {
+  font-family: 'Assistant';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(fonts/assistant-latin-700-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'Assistant';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fonts/assistant-hebrew-800-normal.woff2) format('woff2');
+  unicode-range: U+0307-0308,U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F;
+}
+@font-face {
+  font-family: 'Assistant';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url(fonts/assistant-latin-800-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+        /* =====================================================================
+           עיצוב מסך הניהול (סרגל צד, כרטיס ראשי, סרגלי כלים, טבלאות)
+           מבוסס על משתני הצבע של ערכות הנושא, כך שכל הערכות ממשיכות לעבוד
+        ===================================================================== */
+        :root {
+            --bar-h: 40px;
+            --nav-active: #0284C7;
+            --btn-save: #059669;
+            --btn-save-hover: #047857;
+            --row-hover: rgba(100, 116, 139, 0.09);
+            --soft-fill: rgba(100, 116, 139, 0.08);
+        }
+        body.theme-gold { --nav-active: #F59E0B; --row-hover: rgba(245,158,11,0.10); --soft-fill: rgba(255,255,255,0.05); }
+        body.theme-jerusalem { --nav-active: #881337; }
+        body.theme-sky { --nav-active: #0369A1; }
+
+        /* ----- שורה עליונה (חיה) ----- */
+        .live-clock-bar {
+            height: var(--bar-h);
+            border-bottom: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            position: relative;
+            z-index: 5;
+        }
+        .live-clock-bar .lcb-chip {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.14);
+        }
+        #topChipRosh { color: #FCD34D; }
+        #topChipParasha { color: #93C5FD; }
+        #topChipRosh.hot { color: #0F172A; background: #FCD34D; border-color: transparent; }
+        .lcb-clock {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 6px;
+            padding: 1px 10px;
+            color: #38BDF8;
+            font-size: 16px;
+        }
+        .screen { height: calc(100% - var(--bar-h)); }
+
+        /* ----- מעטפת מסך הניהול ----- */
+        #adminScreen { padding: 0; justify-content: flex-start; }
+        #adminScreen, #adminScreen button, #adminScreen input, #adminScreen select, #adminScreen textarea,
+        .modal-overlay, .modal-overlay button, .modal-overlay input, .modal-overlay select, .modal-overlay textarea,
+        .live-clock-bar {
+            font-family: 'Assistant', 'Rubik', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        }
+        .admin-shell { display: flex; width: 100%; height: 100%; position: relative; overflow: hidden; }
+        .admin-main { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 12px; box-sizing: border-box; }
+
+        /* ----- סרגל צד ----- */
+        .admin-aside {
+            width: 232px;
+            flex: none;
+            background: var(--card-bg);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            transition: width 200ms cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: -2px 0 12px rgba(0,0,0,0.03);
+            z-index: 20;
+        }
+        .aside-top {
+            height: 58px;
+            flex: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .aside-brand { display: flex; align-items: center; gap: 10px; overflow: hidden; }
+        .brand-logo {
+            width: 38px; height: 38px; border-radius: 10px; flex: none;
+            background: rgba(245, 158, 11, 0.14);
+            display: flex; align-items: center; justify-content: center; font-size: 20px;
+        }
+        .brand-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+        .brand-title { font-weight: 800; font-size: 15px; color: var(--text-main); }
+        .brand-sub { font-size: 11.5px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+        .aside-toggle, .admin-burger {
+            border: none; background: transparent; cursor: pointer;
+            color: var(--text-secondary); font-size: 20px; line-height: 1;
+            padding: 8px 10px; border-radius: 8px;
+        }
+        .aside-toggle:hover, .admin-burger:hover { background: var(--soft-fill); color: var(--nav-active); }
+        .admin-burger { display: none; margin-left: 8px; }
+
+        .aside-new { padding: 10px; flex: none; border-bottom: 1px solid var(--border-color); }
+        .aside-new-btn {
+            width: 100%; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 9px 10px; border-radius: 10px;
+            background: var(--nav-active); color: #fff;
+            font-weight: 800; font-size: 14px;
+            transition: filter 0.15s ease;
+        }
+        .aside-new-btn:hover { filter: brightness(1.08); }
+
+        .admin-aside .admin-tabs {
+            flex: 1; display: block; overflow-y: auto;
+            padding: 6px 0; margin: 0; border: none; gap: 0;
+        }
+        .admin-aside .tab-btn {
+            position: relative; overflow: hidden;
+            display: flex; align-items: center; width: 100%;
+            padding: 9px 12px; margin: 0;
+            border: none; border-right: 4px solid transparent; border-radius: 0;
+            background: transparent; color: var(--text-secondary);
+            font-weight: 700; font-size: 14.5px; text-align: right;
+            cursor: pointer; white-space: nowrap;
+            transition: background 150ms ease, color 150ms ease;
+        }
+        .admin-aside .tab-btn:hover { background: var(--soft-fill); color: var(--nav-active); }
+        .admin-aside .tab-btn.active {
+            background: transparent; color: var(--nav-active);
+            border-right-color: var(--nav-active);
+        }
+        .admin-aside .tab-btn.active::before {
+            content: ''; position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+            background: var(--nav-active); opacity: 0.12; pointer-events: none;
+        }
+        .icon-box {
+            width: 30px; height: 30px; flex: none; margin-left: 10px;
+            display: flex; align-items: center; justify-content: center; font-size: 18px;
+        }
+        .aside-foot {
+            flex: none; padding: 10px; text-align: center; font-size: 11.5px;
+            color: var(--text-secondary); border-top: 1px solid var(--border-color);
+        }
+
+        /* מצב מכווץ (איקונים בלבד) */
+        @media (min-width: 700px) {
+            body.narrow_menu .admin-aside { width: 64px; }
+            body.narrow_menu .hide-on-narrow { display: none !important; }
+            body.narrow_menu .aside-top { justify-content: center; padding: 0; }
+            body.narrow_menu .admin-aside .tab-btn { padding: 9px 0; justify-content: center; }
+            body.narrow_menu .admin-aside .tab-btn .item-label { display: none; }
+            body.narrow_menu .icon-box { margin-left: 0; }
+        }
+
+        /* ----- כרטיס ראשי ----- */
+        .admin-container {
+            flex: 1; min-height: 0; height: auto;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .admin-head {
+            flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            padding: 12px 18px; border-bottom: 1px solid var(--border-color);
+        }
+        .admin-head h2 { margin: 0; font-size: 21px; font-weight: 800; color: var(--text-main); }
+        .admin-head p { margin: 2px 0 0; font-size: 12px; color: var(--text-secondary); }
+        .admin-copy { font-size: 11px; color: var(--text-secondary); }
+        .admin-container .tab-content { padding: 16px 18px; min-height: 0; }
+
+        /* לשוניות משנה */
+        .sub-tabs {
+            background: var(--soft-fill);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 8px; gap: 6px; margin-bottom: 12px;
+        }
+        .sub-tab-btn {
+            flex: 1 1 auto; padding: 7px 12px; border-radius: 7px;
+            font-size: 13px; font-weight: 700; font-family: inherit;
+            color: var(--text-secondary);
+            transition: all 150ms ease;
+        }
+        .sub-tab-btn:hover:not(.active) { border-color: var(--text-secondary); color: var(--text-main); }
+        .sub-tab-btn.active {
+            background: var(--nav-active); border-color: var(--nav-active); color: #fff;
+            box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+        }
+
+        /* ----- סרגל כלים מודרני ----- */
+        .modern-toolbar {
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+            background: var(--card-bg);
+            padding: 10px 14px; margin-bottom: 12px;
+            border: 1px solid var(--border-color); border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .tb-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .btn-modern {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 8px 16px; border-radius: 8px;
+            font-size: 14px; font-weight: 700; font-family: inherit;
+            border: 1px solid transparent; cursor: pointer; white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+        .btn-modern-primary { background: var(--btn-save); color: #fff; }
+        .btn-modern-primary:hover { background: var(--btn-save-hover); box-shadow: 0 2px 6px rgba(5,150,105,0.25); }
+        .btn-modern-secondary { background: var(--primary-color); color: #fff; }
+        .btn-modern-secondary:hover { filter: brightness(1.12); box-shadow: 0 2px 6px rgba(30,64,175,0.25); }
+        .btn-modern-run { background: #0EA5E9; color: #fff; }
+        .btn-modern-run:hover { background: #0284C7; }
+        .btn-modern-outline { background: var(--bg-color); color: var(--text-main); border-color: var(--border-color); }
+        .btn-modern-outline:hover { border-color: var(--text-secondary); }
+
+        .dropdown-container { position: relative; display: inline-block; }
+        .dropdown-menu {
+            display: none; position: absolute; top: 100%; left: 0; margin-top: 6px;
+            min-width: 210px; background: var(--card-bg);
+            border: 1px solid var(--border-color); border-radius: 8px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.16); z-index: 50; overflow: hidden;
+        }
+        .dropdown-container.open .dropdown-menu { display: block; }
+        .dropdown-item {
+            display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box;
+            padding: 10px 14px; border: none; background: transparent; text-align: right;
+            color: var(--text-main); font-size: 14px; font-weight: 700; font-family: inherit;
+            cursor: pointer;
+        }
+        .dropdown-item:hover { background: var(--soft-fill); color: var(--nav-active); }
+
+        /* ----- טבלאות ----- */
+        .table-wrap { overflow-x: auto; border: 1px solid var(--border-color); border-radius: 10px; }
+        .congregants-table { margin-top: 0; border-collapse: collapse; width: 100%; }
+        .congregants-table th, .congregants-table td {
+            border: none; border-bottom: 1px solid var(--border-color);
+            padding: 10px 14px; text-align: right; font-size: 14px;
+        }
+        .congregants-table th { background: var(--soft-fill); color: var(--text-main); font-weight: 800; }
+        .congregants-table th:first-child, .congregants-table td:first-child { text-align: center; width: 64px; }
+        .congregants-table tbody tr:last-child td { border-bottom: none; }
+        .congregants-table tbody tr:hover { background: var(--row-hover); }
+        .row-actions { display: flex; gap: 6px; justify-content: center; }
+        .row-btn {
+            border: none; border-radius: 6px; padding: 4px 12px; cursor: pointer;
+            font-size: 12.5px; font-weight: 700; font-family: inherit; color: #fff;
+        }
+        .row-btn.edit { background: #0EA5E9; }
+        .row-btn.edit:hover { background: #0284C7; }
+        .row-btn.del { background: #F43F5E; }
+        .row-btn.del:hover { background: #E11D48; }
+
+        /* ----- שדות טפסים ----- */
+        .form-group label { font-weight: 700; }
+        .form-group input, .form-group select, .form-group textarea {
+            border-radius: 8px; padding: 9px 12px; font-family: inherit;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: var(--nav-active); box-shadow: 0 0 0 3px rgba(2,132,199,0.18);
+        }
+
+        /* ----- תחתית: פעולות ----- */
+        .footer-actions {
+            flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+            padding: 10px 18px; background: var(--soft-fill); border-top: 1px solid var(--border-color);
+        }
+
+        /* ----- מובייל: סרגל צד נפתח כמגירה ----- */
+        .admin-backdrop { display: none; }
+        @media (max-width: 699px) {
+            .admin-main { padding: 8px; }
+            .admin-burger { display: inline-block; }
+            .admin-aside {
+                position: absolute; top: 0; bottom: 0; right: 0; width: 250px;
+                transform: translateX(105%); transition: transform 220ms ease;
+                box-shadow: -8px 0 24px rgba(0,0,0,0.25);
+            }
+            body.menu_open .admin-aside { transform: translateX(0); }
+            body.menu_open .admin-backdrop {
+                display: block; position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+                background: rgba(0,0,0,0.45); z-index: 15;
+            }
+            .admin-copy, .admin-head p { display: none; }
+            .admin-head { padding: 10px 12px; justify-content: flex-start; }
+            .admin-container .tab-content { padding: 12px; }
+            .footer-actions { padding: 8px 10px; gap: 6px; }
+            .footer-actions .btn-modern { flex: 1 1 auto; justify-content: center; padding: 9px 8px; font-size: 13px; }
+            .modern-toolbar { padding: 8px; }
+            .tb-group { width: 100%; }
+            .tb-group .btn-modern { flex: 1 1 auto; justify-content: center; }
+            .dropdown-container { width: 100%; }
+            .dropdown-container > .btn-modern { width: 100%; justify-content: center; }
+            #sub1 .congregants-table th:nth-child(4), #sub1 .congregants-table td:nth-child(4),
+            #sub2 .congregants-table th:nth-child(4), #sub2 .congregants-table td:nth-child(4),
+            #sub3 .congregants-table th:nth-child(4), #sub3 .congregants-table td:nth-child(4),
+            #sub5 .congregants-table th:nth-child(4), #sub5 .congregants-table td:nth-child(4) { display: none; }
+            .congregants-table th, .congregants-table td { padding: 9px 8px; }
+        }
     </style>
 </head>
 <body class="theme-classic">
@@ -952,9 +1341,18 @@
 <div class="app-container">
 
     <div class="live-clock-bar">
-        <span id="topLiveClock">🕒 שעה: --:--:--</span>
-        <span id="topLiveHebrewDate">📜 עברי: טוען...</span>
-        <span id="topLiveGregorianDate">📅 לועזי: טוען...</span>
+        <div class="lcb-group">
+            <span class="lcb-chip" id="topChipRosh" style="display:none;"></span>
+            <span class="lcb-chip" id="topChipParasha" style="display:none;"></span>
+        </div>
+        <div class="lcb-group">
+            <span class="lcb-hebrew" id="topLiveHebrewDate">טוען...</span>
+            <span class="lcb-sep">•</span>
+            <span class="lcb-greg" id="topLiveGregorianDate"></span>
+        </div>
+        <div class="lcb-group">
+            <span class="lcb-clock" id="topLiveClock">--:--:--</span>
+        </div>
     </div>
 
     <!-- 0. Login Screen -->
@@ -1129,26 +1527,48 @@
 
     <!-- 3. Advanced Admin Panel -->
     <div id="adminScreen" class="screen">
-        <div class="admin-container">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <h2 id="adminPanelHeaderTitle" style="color: var(--primary-color); margin:0;">ניהול מערכת לוח</h2>
-                <div style="font-size: 11px; color: var(--text-secondary); font-weight: normal;">
-                    © כל הזכויות שמורות 2026 לאבירן א. חיים
+        <div class="admin-shell">
+
+            <aside class="admin-aside" id="adminAside">
+                <div class="aside-top">
+                    <div class="aside-brand hide-on-narrow">
+                        <div class="brand-logo">📖</div>
+                        <div class="brand-text">
+                            <span class="brand-title">מערכת לוח</span>
+                            <span class="brand-sub" id="sidebarShulName">ניהול בית כנסת</span>
+                        </div>
+                    </div>
+                    <button class="aside-toggle" title="כווץ / הרחב תפריט" onclick="toggleAdminSidebar()">☰</button>
                 </div>
-            </div>
-            
-            <div class="admin-tabs">
-                <button class="tab-btn active" onclick="switchTab('tabTorah', this)">📖 קריאת תורה</button>
-                <button class="tab-btn" onclick="switchTab('tabRosh', this)">🌙 ראש חודש</button>
-                <button class="tab-btn" onclick="switchTab('tabYahrtzeit', this)">🕯️ יארצייט</button>
-                <button class="tab-btn" onclick="switchTab('tabEvents', this)">📜 אירועים</button>
-                <button class="tab-btn" onclick="switchTab('tabLists', this)">👥 ניהול רשימות</button>
-                <button class="tab-btn" onclick="switchTab('tabCalendar', this)">📅 לוח שנה</button>
-                <button class="tab-btn" onclick="switchTab('tabTimes', this)">🕒 זמנים</button>
-                <button class="tab-btn" onclick="switchTab('tabSlides', this)">🎛️ ניהול שקופיות</button>
-                <button class="tab-btn" onclick="switchTab('tabTheme', this)">🎨 ערכת נושא</button>
-                <button class="tab-btn" onclick="switchTab('tabSettings', this)">⚙️ הגדרות כותרות</button>
-            </div>
+                <div class="aside-new">
+                    <button class="aside-new-btn" title="שקופית חדשה" onclick="openAddCustomSlideModal()"><span>✏️</span><span class="item-label hide-on-narrow">שקופית חדשה</span></button>
+                </div>
+                <nav class="admin-tabs">
+                    <button class="tab-btn active" title="קריאת תורה" onclick="switchTab('tabTorah', this)"><span class="icon-box">📖</span><span class="item-label">קריאת תורה</span></button>
+                    <button class="tab-btn" title="ראש חודש" onclick="switchTab('tabRosh', this)"><span class="icon-box">🌙</span><span class="item-label">ראש חודש</span></button>
+                    <button class="tab-btn" title="יארצייט" onclick="switchTab('tabYahrtzeit', this)"><span class="icon-box">🕯️</span><span class="item-label">יארצייט</span></button>
+                    <button class="tab-btn" title="אירועים" onclick="switchTab('tabEvents', this)"><span class="icon-box">📜</span><span class="item-label">אירועים</span></button>
+                    <button class="tab-btn" title="ניהול רשימות" onclick="switchTab('tabLists', this)"><span class="icon-box">👥</span><span class="item-label">ניהול רשימות</span></button>
+                    <button class="tab-btn" title="לוח שנה" onclick="switchTab('tabCalendar', this)"><span class="icon-box">📅</span><span class="item-label">לוח שנה</span></button>
+                    <button class="tab-btn" title="זמנים" onclick="switchTab('tabTimes', this)"><span class="icon-box">🕒</span><span class="item-label">זמנים</span></button>
+                    <button class="tab-btn" title="ניהול שקופיות" onclick="switchTab('tabSlides', this)"><span class="icon-box">🎛️</span><span class="item-label">ניהול שקופיות</span></button>
+                    <button class="tab-btn" title="ערכת נושא" onclick="switchTab('tabTheme', this)"><span class="icon-box">🎨</span><span class="item-label">ערכת נושא</span></button>
+                    <button class="tab-btn" title="הגדרות כותרות" onclick="switchTab('tabSettings', this)"><span class="icon-box">⚙️</span><span class="item-label">הגדרות כותרות</span></button>
+                </nav>
+                <div class="aside-foot hide-on-narrow">גרסה 2027 • מערכת בית כנסת</div>
+            </aside>
+            <div class="admin-backdrop" onclick="closeAdminMenu()"></div>
+
+            <div class="admin-main">
+            <div class="admin-container">
+                <div class="admin-head">
+                    <button class="admin-burger" title="תפריט" onclick="openAdminMenu()">☰</button>
+                    <div style="flex:1; min-width:0;">
+                        <h2 id="adminPanelHeaderTitle">ניהול מערכת לוח</h2>
+                        <p>נהל את עליות התורה, הרשימות והשיבוצים האוטומטיים</p>
+                    </div>
+                    <div class="admin-copy">© כל הזכויות שמורות 2026 לאבירן א. חיים</div>
+                </div>
 
             <div id="tabTorah" class="tab-content active">
                 <div class="form-grid">
@@ -1192,20 +1612,21 @@
                             <label style="margin: 0; font-size: 14px;">הגדרת ראש חודש:</label>
                             <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--accent-color); font-weight: bold;">
                                 <input type="checkbox" id="autoRoshCheckbox" onchange="toggleAutoRosh()" style="width: 16px; height: 16px; cursor: pointer;">
-                                שליפה אוטומטית מ-Hebcal.com (הצגה החל מיום שלישי שלפני שבת מברכין ועד מוצאי שבת)
+                                חישוב אוטומטי לפי הלוח העברי (הצגה מיום שלישי שלפני שבת מברכין ועד מוצאי שבת)
                             </label>
                         </div>
-                        <p style="font-size: 12px; color: var(--text-secondary); margin: 4px 0 0 0;">במצב אוטומטי, המערכת מזהה את שבת מברכין, מעלה את השקופית 3 ימים קודם (ביום שלישי) ומורידה אותה במוצאי שבת.</p>
+                        <p style="font-size: 12px; color: var(--text-secondary); margin: 4px 0 0 0;">במצב אוטומטי, המערכת מחשבת לפי התאריך העברי את החודש הבא, את ימי ראש חודש (יום אחד או יומיים), ואם החודש מלא או חסר. השקופית עולה ביום שלישי שלפני שבת מברכין ויורדת במוצאי שבת.</p>
+                        <div id="roshAutoPreview" style="display:none; margin-top:8px; padding:8px 10px; border-radius:6px; border:1px dashed var(--border-color); font-size:13px; line-height:1.6;"></div>
                     </div>
 
                     <div class="form-group full-width">
                         <label>בחירת חודש ידנית:</label>
                         <select id="inRoshSelect" onchange="updateRoshChodeshDisplay()">
-                            <option value="ניסן">ניסן</option><option value="אייר">אייר</option><option value="סיוון">סיוון</option><option value="תמוז">תמוז</option><option value="אב">אב</option><option value="אלול">אלול</option><option value="תשרי">תשרי</option><option value="חשוון">חשוון</option><option value="כסלו">כסלו</option><option value="טבת">טבת</option><option value="שבט">שבט</option><option value="אדר">אדר</option>
+                            <option value="ניסן">ניסן</option><option value="אייר">אייר</option><option value="סיוון">סיוון</option><option value="תמוז">תמוז</option><option value="אב">אב</option><option value="אלול">אלול</option><option value="תשרי">תשרי</option><option value="חשוון">חשוון</option><option value="כסלו">כסלו</option><option value="טבת">טבת</option><option value="שבט">שבט</option><option value="אדר">אדר</option><option value="אדר א'">אדר א'</option><option value="אדר ב'">אדר ב'</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>סוג חודש:</label>
+                        <label>סוג החודש שמסתיים:</label>
                         <select id="inRoshType" onchange="updateRoshChodeshDisplay()">
                             <option value="מלא">מלא (30 יום)</option>
                             <option value="חסר">חסר (29 יום)</option>
@@ -1309,72 +1730,84 @@
                 </div>
 
                 <div id="sub1" class="sub-content active">
-                    <div class="import-box">
-                        <p style="font-size: 12px; margin:0 0 6px 0;">ייבוא רשימת מועמדים מקובץ Excel או PDF:</p>
-                        <input type="file" id="fileImportInput1" accept=".xlsx, .xls, .pdf" style="display:none;" onchange="handleFileImport(event, 'congregants')">
-                        <button class="control-btn" style="background:var(--primary-color); color:white;" onclick="document.getElementById('fileImportInput1').click()">בחירת קובץ מועמדים</button>
+                    <div class="modern-toolbar">
+                        <div class="tb-group">
+                            <button class="btn-modern btn-modern-primary" onclick="openAddMemberModal('congregants', 'מועמד לעליות')">＋ הוסף מועמד</button>
+                            <button class="btn-modern btn-modern-secondary" onclick="confirmAutoRotation()">✨ שיבוץ אוטומטי</button>
+                        </div>
+                        <div class="dropdown-container">
+                            <button class="btn-modern btn-modern-outline" onclick="toggleDropdown(this, event)">📁 ניהול קבצים <span style="font-size:10px; opacity:.7;">▼</span></button>
+                            <div class="dropdown-menu">
+                                <label class="dropdown-item" for="fileImportInput1">📥 ייבוא מ-Excel<input type="file" id="fileImportInput1" accept=".xlsx, .xls" style="display:none;" onchange="handleFileImport(event, 'congregants')"></label>
+                                <button class="dropdown-item" onclick="closeAllDropdowns(); openExportModal('congregants', 'רשימת מועמדים לעליות')">📤 ייצוא רשימה</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="action-bar">
-                        <button class="action-btn-auto" onclick="confirmAutoRotation()">✨ שיבוץ אוטומטי</button>
-                        <button class="action-btn-add" onclick="openAddMemberModal('congregants', 'מועמד לעליות')">+ הוסף מועמד</button>
-                        <button class="action-btn-export" onclick="openExportModal('congregants', 'רשימת מועמדים לעליות')">📤 ייצא רשימה</button>
-                    </div>
-                    <table class="congregants-table"><thead><tr><th>מיקום</th><th>שם פרטי</th><th>שם משפחה</th><th>שם מלא (תצוגה)</th><th>פעולות</th></tr></thead><tbody id="tableBody1"></tbody></table>
+                    <div class="table-wrap"><table class="congregants-table"><thead><tr><th>מיקום</th><th>שם פרטי</th><th>שם משפחה</th><th>שם מלא (תצוגה)</th><th>פעולות</th></tr></thead><tbody id="tableBody1"></tbody></table></div>
                 </div>
 
                 <div id="sub2" class="sub-content">
-                    <div class="import-box">
-                        <p style="font-size: 12px; margin:0 0 6px 0;">ייבוא רשימת מתרגמים מקובץ Excel או PDF:</p>
-                        <input type="file" id="fileImportInput2" accept=".xlsx, .xls, .pdf" style="display:none;" onchange="handleFileImport(event, 'translators')">
-                        <button class="control-btn" style="background:var(--primary-color); color:white;" onclick="document.getElementById('fileImportInput2').click()">בחירת קובץ מתרגמים</button>
+                    <div class="modern-toolbar">
+                        <div class="tb-group">
+                            <button class="btn-modern btn-modern-primary" onclick="openAddMemberModal('translators', 'מתרגם')">＋ הוסף מתרגם</button>
+                        </div>
+                        <div class="dropdown-container">
+                            <button class="btn-modern btn-modern-outline" onclick="toggleDropdown(this, event)">📁 ניהול קבצים <span style="font-size:10px; opacity:.7;">▼</span></button>
+                            <div class="dropdown-menu">
+                                <label class="dropdown-item" for="fileImportInput2">📥 ייבוא מ-Excel<input type="file" id="fileImportInput2" accept=".xlsx, .xls" style="display:none;" onchange="handleFileImport(event, 'translators')"></label>
+                                <button class="dropdown-item" onclick="closeAllDropdowns(); openExportModal('translators', 'רשימת מתרגמים')">📤 ייצוא רשימה</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="action-bar">
-                        <button class="action-btn-add" style="flex:2;" onclick="openAddMemberModal('translators', 'מתרגם')">+ הוסף מתרגם חדש</button>
-                        <button class="action-btn-export" style="flex:1;" onclick="openExportModal('translators', 'רשימת מתרגמים')">📤 ייצא רשימה</button>
-                    </div>
-                    <table class="congregants-table"><thead><tr><th>מיקום</th><th>שם פרטי</th><th>שם משפחה</th><th>שם מלא (תצוגה)</th><th>פעולות</th></tr></thead><tbody id="tableBody2"></tbody></table>
+                    <div class="table-wrap"><table class="congregants-table"><thead><tr><th>מיקום</th><th>שם פרטי</th><th>שם משפחה</th><th>שם מלא (תצוגה)</th><th>פעולות</th></tr></thead><tbody id="tableBody2"></tbody></table></div>
                 </div>
 
                 <div id="sub3" class="sub-content">
-                    <div class="import-box">
-                        <p style="font-size: 12px; margin:0 0 6px 0;">ייבוא רשימת מוציאי ס"ת מקובץ Excel או PDF:</p>
-                        <input type="file" id="fileImportInput3" accept=".xlsx, .xls, .pdf" style="display:none;" onchange="handleFileImport(event, 'seferTorah')">
-                        <button class="control-btn" style="background:var(--primary-color); color:white;" onclick="document.getElementById('fileImportInput3').click()">בחירת קובץ הוצאת ס"ת</button>
+                    <div class="modern-toolbar">
+                        <div class="tb-group">
+                            <button class="btn-modern btn-modern-primary" onclick="openAddMemberModal('seferTorah', 'מוציא ס&quot;ת')">＋ הוסף מוציא ס&quot;ת</button>
+                        </div>
+                        <div class="dropdown-container">
+                            <button class="btn-modern btn-modern-outline" onclick="toggleDropdown(this, event)">📁 ניהול קבצים <span style="font-size:10px; opacity:.7;">▼</span></button>
+                            <div class="dropdown-menu">
+                                <label class="dropdown-item" for="fileImportInput3">📥 ייבוא מ-Excel<input type="file" id="fileImportInput3" accept=".xlsx, .xls" style="display:none;" onchange="handleFileImport(event, 'seferTorah')"></label>
+                                <button class="dropdown-item" onclick="closeAllDropdowns(); openExportModal('seferTorah', 'רשימת מוציאי ספר תורה')">📤 ייצוא רשימה</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="action-bar">
-                        <button class="action-btn-add" style="flex:2;" onclick="openAddMemberModal('seferTorah', 'מוציא ס"ת')">+ הוסף מוציא ס"ת</button>
-                        <button class="action-btn-export" style="flex:1;" onclick="openExportModal('seferTorah', 'רשימת מוציאי ספר תורה')">📤 ייצא רשימה</button>
-                    </div>
-                    <table class="congregants-table"><thead><tr><th>מיקום</th><th>שם פרטי</th><th>שם משפחה</th><th>שם מלא (תצוגה)</th><th>פעולות</th></tr></thead><tbody id="tableBody3"></tbody></table>
+                    <div class="table-wrap"><table class="congregants-table"><thead><tr><th>מיקום</th><th>שם פרטי</th><th>שם משפחה</th><th>שם מלא (תצוגה)</th><th>פעולות</th></tr></thead><tbody id="tableBody3"></tbody></table></div>
                 </div>
 
                 <div id="sub4" class="sub-content">
-                    <div class="import-box">
-                        <p style="font-size: 12px; margin:0 0 6px 0;">ייבוא רשימת יארצייט מקובץ Excel או PDF:</p>
-                        <input type="file" id="fileImportInputYahrtzeit" accept=".xlsx, .xls, .pdf" style="display:none;" onchange="handleYahrtzeitFileImport(event)">
-                        <button class="control-btn" style="background:var(--primary-color); color:white;" onclick="document.getElementById('fileImportInputYahrtzeit').click()">בחירת קובץ יארצייט</button>
+                    <div class="modern-toolbar">
+                        <div class="tb-group">
+                            <button class="btn-modern btn-modern-primary" onclick="openAddYahrtzeitModal()">＋ הוסף יארצייט</button>
+                        </div>
+                        <div class="dropdown-container">
+                            <button class="btn-modern btn-modern-outline" onclick="toggleDropdown(this, event)">📁 ניהול קבצים <span style="font-size:10px; opacity:.7;">▼</span></button>
+                            <div class="dropdown-menu">
+                                <label class="dropdown-item" for="fileImportInputYahrtzeit">📥 ייבוא מ-Excel<input type="file" id="fileImportInputYahrtzeit" accept=".xlsx, .xls" style="display:none;" onchange="handleYahrtzeitFileImport(event)"></label>
+                                <button class="dropdown-item" onclick="closeAllDropdowns(); openExportModal('yahrtzeits', 'רשימת יארצייט')">📤 ייצוא רשימה</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="action-bar">
-                        <button class="action-btn-add" style="flex:2;" onclick="openAddYahrtzeitModal()">+ הוסף יארצייט חדש</button>
-                        <button class="action-btn-export" style="flex:1;" onclick="openExportModal('yahrtzeits', 'רשימת יארצייט')">📤 ייצא רשימה</button>
-                    </div>
-                    <table class="congregants-table">
-                        <thead><tr><th>חודש</th><th>שם הנפטר/ת</th><th>תאריך פטירה</th><th>שבת אזכרה</th><th>פעולות</th></tr></thead>
-                        <tbody id="yahrtzeitTableBody"></tbody>
-                    </table>
+                    <div class="table-wrap"><table class="congregants-table"><thead><tr><th>חודש</th><th>שם הנפטר/ת</th><th>תאריך פטירה</th><th>שבת אזכרה</th><th>פעולות</th></tr></thead><tbody id="yahrtzeitTableBody"></tbody></table></div>
                 </div>
 
                 <div id="sub5" class="sub-content">
-                    <div class="import-box">
-                        <p style="font-size: 12px; margin:0 0 6px 0;">ייבוא רשימת חזנים מקובץ Excel או PDF:</p>
-                        <input type="file" id="fileImportInput4" accept=".xlsx, .xls, .pdf" style="display:none;" onchange="handleFileImport(event, 'hazanim')">
-                        <button class="control-btn" style="background:var(--primary-color); color:white;" onclick="document.getElementById('fileImportInput4').click()">בחירת קובץ חזנים</button>
+                    <div class="modern-toolbar">
+                        <div class="tb-group">
+                            <button class="btn-modern btn-modern-primary" onclick="openAddMemberModal('hazanim', 'חזן')">＋ הוסף חזן</button>
+                        </div>
+                        <div class="dropdown-container">
+                            <button class="btn-modern btn-modern-outline" onclick="toggleDropdown(this, event)">📁 ניהול קבצים <span style="font-size:10px; opacity:.7;">▼</span></button>
+                            <div class="dropdown-menu">
+                                <label class="dropdown-item" for="fileImportInput4">📥 ייבוא מ-Excel<input type="file" id="fileImportInput4" accept=".xlsx, .xls" style="display:none;" onchange="handleFileImport(event, 'hazanim')"></label>
+                                <button class="dropdown-item" onclick="closeAllDropdowns(); openExportModal('hazanim', 'רשימת חזנים')">📤 ייצוא רשימה</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="action-bar">
-                        <button class="action-btn-add" style="flex:2;" onclick="openAddMemberModal('hazanim', 'חזן')">+ הוסף חזן חדש</button>
-                        <button class="action-btn-export" style="flex:1;" onclick="openExportModal('hazanim', 'רשימת חזנים')">📤 ייצא רשימה</button>
-                    </div>
-                    <table class="congregants-table"><thead><tr><th>מיקום</th><th>שם פרטי</th><th>שם משפחה</th><th>שם מלא (תצוגה)</th><th>פעולות</th></tr></thead><tbody id="tableBody4"></tbody></table>
+                    <div class="table-wrap"><table class="congregants-table"><thead><tr><th>מיקום</th><th>שם פרטי</th><th>שם משפחה</th><th>שם מלא (תצוגה)</th><th>פעולות</th></tr></thead><tbody id="tableBody4"></tbody></table></div>
                 </div>
             </div>
 
@@ -1514,13 +1947,15 @@
                 </div>
             </div>
 
-            <div style="margin-top: 16px; display: flex; gap: 10px;">
-                <button class="btn btn-secondary" style="width:140px; margin:0;" onclick="confirmCancel()">ביטול</button>
-                <button class="btn" style="background:var(--accent-color); color:#0F172A; flex:1; margin:0;" onclick="saveChangesAndShow()">שמור שינויים והצג בלוח</button>
-                <button class="btn" style="background:#059669; flex:1; margin:0;" onclick="saveChangesOnly()">שמור שינויים</button>
+            <div class="footer-actions">
+                <button class="btn-modern btn-modern-run" onclick="saveChangesAndShow()">▶ שמור והצג בלוח</button>
+                <button class="btn-modern btn-modern-primary" onclick="saveChangesOnly()">💾 שמור שינויים</button>
+                <button class="btn-modern btn-modern-outline" onclick="confirmCancel()">ביטול</button>
             </div>
-        </div>
-    </div>
+            </div><!-- /admin-container -->
+            </div><!-- /admin-main -->
+        </div><!-- /admin-shell -->
+    </div><!-- /adminScreen -->
 
 </div>
 
@@ -1893,11 +2328,66 @@
         });
     }
 
+
+    // ===== שורה עליונה: תאריך עברי מקומי, פרשה וספירה לאחור לראש חודש =====
+    function hebYearLetters(year) {
+        let n = year % 1000, tail = '';
+        if (n % 100 === 15) { tail = 'טו'; n -= 15; } else if (n % 100 === 16) { tail = 'טז'; n -= 16; }
+        const vals = [[400,'ת'],[300,'ש'],[200,'ר'],[100,'ק'],[90,'צ'],[80,'פ'],[70,'ע'],[60,'ס'],[50,'נ'],[40,'מ'],[30,'ל'],[20,'כ'],[10,'י'],[9,'ט'],[8,'ח'],[7,'ז'],[6,'ו'],[5,'ה'],[4,'ד'],[3,'ג'],[2,'ב'],[1,'א']];
+        let s = '';
+        for (const [v, l] of vals) { while (n >= v) { s += l; n -= v; } }
+        s += tail;
+        const finals = { 'כ': 'ך', 'מ': 'ם', 'נ': 'ן', 'פ': 'ף', 'צ': 'ץ' };
+        const last = s.slice(-1);
+        if (finals[last]) s = s.slice(0, -1) + finals[last];
+        return s.length > 1 ? s.slice(0, -1) + '"' + s.slice(-1) : s + "'";
+    }
+
+    let topBarCacheKey = '';
+    function updateTopBarInfo(now) {
+        const key = now.toDateString() + '|' + (currentSynagogueKey || '') + '|' + Math.floor(now.getMinutes() / 5);
+        if (key === topBarCacheKey) return;
+        topBarCacheKey = key;
+        try {
+            const noon = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12);
+            const h = hebParts(noon);
+            const yearNum = parseInt(hebCalFormatter.formatToParts(noon).find(x => x.type === 'year').value, 10);
+            const hebStr = `${hebDayLetters(h.day)} ${hebMonthHe(h.month)} ${hebYearLetters(yearNum)}`;
+            document.getElementById('topLiveHebrewDate').innerText = `${HEB_WEEKDAY_TITLE[now.getDay()]} · ${hebStr}`;
+            document.getElementById('topLiveGregorianDate').innerText = now.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            const shul = currentSynagogueKey ? dbSynagogues[currentSynagogueKey] : null;
+            const cp = document.getElementById('topChipParasha');
+            if (shul && shul.parasha) { cp.innerText = `📖 ${shul.parasha}`; cp.style.display = ''; } else { cp.style.display = 'none'; }
+
+            const cr = document.getElementById('topChipRosh');
+            const r = computeRoshChodesh(now);
+            if (r) {
+                const today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12);
+                const diff = Math.round((r.firstDate - today0) / 86400000);
+                let txt, hot = false;
+                if (diff === 0) { txt = `🌙 היום ראש חודש ${r.monthName}`; hot = true; }
+                else if (diff === -1) { txt = `🌙 היום יום ב' של ראש חודש ${r.monthName}`; hot = true; }
+                else if (diff === 1) { txt = `🌙 מחר ראש חודש ${r.monthName}`; hot = true; }
+                else if (diff > 1) { txt = `🌙 ר"ח ${r.monthName} בעוד ${diff} ימים`; }
+                if (txt) { cr.innerText = txt; cr.className = 'lcb-chip' + (hot ? ' hot' : ''); cr.style.display = ''; }
+                else cr.style.display = 'none';
+            } else cr.style.display = 'none';
+        } catch (e) { console.error('עדכון שורה עליונה נכשל', e); }
+    }
+    const HEB_WEEKDAY_TITLE = ['יום ראשון', 'יום שני', 'יום שלישי', 'יום רביעי', 'יום חמישי', 'יום שישי', 'שבת קודש'];
+
     function initLiveClockAndHebcal() {
+        (function firstPaint() {
+            const now = new Date();
+            document.getElementById('topLiveClock').innerText = now.toLocaleTimeString('he-IL');
+            updateTopBarInfo(now);
+        })();
         setInterval(() => {
             const now = new Date();
             const timeStr = now.toLocaleTimeString('he-IL');
-            document.getElementById('topLiveClock').innerText = `🕒 שעה: ${timeStr}`;
+            document.getElementById('topLiveClock').innerText = timeStr;
+            updateTopBarInfo(now);
             if(document.getElementById('cardLiveTime')) {
                 document.getElementById('cardLiveTime').innerText = timeStr;
             }
@@ -1905,6 +2395,9 @@
 
         fetchHebcalData();
         renderMonthlyCalendar();
+        // רענון תקופתי: פרשת השבוע ותאריך עברי כל חצי שעה, שקופית ראש חודש כל דקה
+        setInterval(fetchHebcalData, 30 * 60 * 1000);
+        setInterval(() => { if (currentSynagogueKey) updateRoshChodeshDisplay(); }, 60 * 1000);
     }
 
     function fetchHebcalData() {
@@ -1944,18 +2437,13 @@
                 const hebrewDateStr = convData.hebrew || "";
                 const gregorianDateStr = now.toLocaleDateString('he-IL', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
 
-                document.getElementById('topLiveHebrewDate').innerText = `📜 עברי: ${hebrewDateStr}`;
-                document.getElementById('topLiveGregorianDate').innerText = `📅 לועזי: ${gregorianDateStr}`;
 
                 if(document.getElementById('cardHebrewDate')) {
                     document.getElementById('cardHebrewDate').innerText = hebrewDateStr;
                     document.getElementById('cardGregorianDate').innerText = gregorianDateStr;
                 }
 
-                if (currentSynagogueKey) {
-                    const shul = dbSynagogues[currentSynagogueKey];
-                    shul.isRoshActiveNow = checkIfRoshWindowActive(convData);
-                }
+                if (currentSynagogueKey) updateRoshChodeshDisplay();
             }
 
             if (currentSynagogueKey && hebcalParasha) {
@@ -1982,39 +2470,148 @@
         });
     }
 
-    function checkIfRoshWindowActive(data) {
-        let events = data.events || [];
-        let dayOfWeek = new Date().getDay();
-        
-        let isShabbatMevarchim = events.some(ev => ev.includes('מבאר') || ev.includes('מברכין') || ev.includes('מבורך'));
-        let isRoshToday = events.some(ev => ev.includes('ראש חודש'));
+    // ===== לוח עברי וראש חודש: חישוב מקומי מלא, ללא תלות באינטרנט =====
+    const HEB_MONTH_NAMES = {
+        'Tishri': 'תשרי', 'Heshvan': 'חשוון', 'Kislev': 'כסלו', 'Tevet': 'טבת', 'Shevat': 'שבט',
+        'Adar I': "אדר א'", 'Adar': 'אדר', 'Adar II': "אדר ב'",
+        'Nisan': 'ניסן', 'Iyar': 'אייר', 'Sivan': 'סיוון', 'Tamuz': 'תמוז', 'Av': 'אב', 'Elul': 'אלול'
+    };
+    const HEB_WEEKDAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+    const hebCalFormatter = new Intl.DateTimeFormat('en-u-ca-hebrew', { day: 'numeric', month: 'long', year: 'numeric' });
 
-        if (isShabbatMevarchim || isRoshToday) {
-            if (dayOfWeek === 0) return false;
-            return true;
-        }
-
-        let hebStr = data.hebrew || "";
-        let isLateInMonth = hebStr.includes('כ') || hebStr.includes('ל') || hebStr.includes('טפ');
-        if (isLateInMonth && (dayOfWeek >= 2 && dayOfWeek <= 5)) {
-            return true;
-        }
-
-        return false;
+    function hebAddDays(date, n) {
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate() + n, 12, 0, 0);
     }
+
+    function hebParts(date) {
+        const p = {};
+        hebCalFormatter.formatToParts(date).forEach(x => { p[x.type] = x.value; });
+        return { day: parseInt(p.day, 10), month: p.month };
+    }
+
+    function hebMonthHe(enName) { return HEB_MONTH_NAMES[enName] || enName; }
+
+    function hebDayLetters(n) {
+        const ones = ['', 'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט'];
+        const tens = ['', 'י', 'כ', 'ל'];
+        let s;
+        if (n === 15) s = 'טו';
+        else if (n === 16) s = 'טז';
+        else s = tens[Math.floor(n / 10)] + ones[n % 10];
+        return s.length > 1 ? s.slice(0, -1) + '"' + s.slice(-1) : s + "'";
+    }
+
+    /**
+     * מחשב את ראש החודש הקרוב ואת חלון ההצגה של שקופית הכרזת ראש חודש.
+     * - ראש חודש = יום א' של החודש החדש; אם החודש הנוכחי מלא (30 יום) גם יום ל' הוא ראש חודש.
+     * - שבת מברכין = השבת האחרונה שלפני ראש החודש (אם ראש חודש חל בשבת, השבת שלפניה). אין ברכת החודש לתשרי.
+     * - חלון ההצגה: מיום שלישי שלפני שבת מברכין (00:00) ועד מוצאי שבת (20:00).
+     */
+    function computeRoshChodesh(now) {
+        now = now || new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
+
+        for (let i = 0; i <= 62; i++) {
+            const d = hebAddDays(today, i);
+            const h = hebParts(d);
+            if (h.day !== 30 && h.day !== 1) continue;
+
+            const prev = hebParts(hebAddDays(d, -1));
+            const isSecondDay = (h.day === 1 && prev.day === 30);
+            const firstDate = isSecondDay ? hebAddDays(d, -1) : d;
+            const twoDays = (h.day === 30) || isSecondDay;
+            const day1Date = twoDays ? hebAddDays(firstDate, 1) : firstDate;
+
+            const day1 = hebParts(day1Date);
+            if (day1.month === 'Tishri') continue;          // ראש השנה: אין הכרזה
+
+            const endingEn = twoDays ? hebParts(firstDate).month : prev.month;
+            const endingLen = twoDays ? 30 : 29;
+            const announcedLen = (hebParts(hebAddDays(day1Date, 29)).day === 30) ? 30 : 29;
+
+            const dowFirst = firstDate.getDay();
+            const back = (dowFirst === 6) ? 7 : dowFirst + 1;
+            const shabbat = hebAddDays(firstDate, -back);
+            const tuesday = hebAddDays(shabbat, -4);
+            const winStart = new Date(tuesday.getFullYear(), tuesday.getMonth(), tuesday.getDate(), 0, 0, 0);
+            const winEnd = new Date(shabbat.getFullYear(), shabbat.getMonth(), shabbat.getDate(), 20, 0, 0);
+
+            const announcedName = hebMonthHe(day1.month);
+            const endingName = hebMonthHe(endingEn);
+            const days = [firstDate].concat(twoDays ? [day1Date] : []);
+            const daysText = days.map(x => HEB_WEEKDAYS[x.getDay()]).join(' ו');
+            const datesText = twoDays
+                ? `${hebDayLetters(30)} ${endingName} ו${hebDayLetters(1)} ${announcedName}`
+                : `${hebDayLetters(1)} ${announcedName}`;
+
+            return {
+                active: now >= winStart && now <= winEnd,
+                monthName: announcedName,
+                endingMonthName: endingName,
+                endingType: endingLen === 30 ? 'מלא' : 'חסר',
+                endingLen: endingLen,
+                announcedType: announcedLen === 30 ? 'מלא' : 'חסר',
+                announcedLen: announcedLen,
+                twoDays: twoDays,
+                daysText: daysText,
+                datesText: datesText,
+                firstDate: firstDate,
+                shabbatMevarchim: shabbat,
+                windowStart: winStart,
+                windowEnd: winEnd
+            };
+        }
+        return null;
+    }
+
+    const HEB_DAYS_LABEL = d => d.toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'numeric' });
 
     function updateRoshChodeshDisplay() {
         const shul = dbSynagogues[currentSynagogueKey];
-        if(!shul) return;
+        if (!shul) return;
 
+        const autoBox = document.getElementById('autoRoshCheckbox');
+        const isAuto = autoBox ? autoBox.checked : (shul.isAutoRosh !== false);
+        const preview = document.getElementById('roshAutoPreview');
+        let r = null;
+        try { r = computeRoshChodesh(); } catch (e) { console.error('חישוב ראש חודש נכשל', e); }
+
+        if (isAuto && r) {
+            // מילוי הטופס (המושבת) בערכים המחושבים, כדי שהמשתמש יראה מה המערכת קבעה
+            const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+            setVal('inRoshSelect', r.monthName);
+            setVal('inRoshType', r.endingType);
+            setVal('inRoshDaysCount', r.twoDays ? 'יומיים' : 'יום אחד');
+            setVal('inRoshDaysOfWeek', r.daysText);
+
+            document.getElementById('lblRoshMonthTitle').innerText = `חודש ${r.monthName}`;
+            const verb = r.twoDays ? `בימים ${r.daysText}` : `ביום ${r.daysText}`;
+            document.getElementById('lblRoshDeclLine').innerText = `הכרזת ראש חודש ${r.monthName} שחל להיות ${verb} (${r.datesText}).`;
+            document.getElementById('lblRoshTypeLine').innerText =
+                `חודש ${r.endingMonthName} הוא חודש ${r.endingType} (בן ${r.endingLen} ימים), ולכן ראש חודש ${r.monthName} הוא ${r.twoDays ? 'שני ימים' : 'יום אחד'}.`;
+
+            if (preview) {
+                preview.style.display = 'block';
+                preview.innerHTML = `<b>החישוב האוטומטי:</b> ראש חודש ${r.monthName} – ${r.twoDays ? 'בימים' : 'ביום'} ${r.daysText} (${r.datesText}).<br>` +
+                    `שבת מברכין: ${HEB_DAYS_LABEL(r.shabbatMevarchim)}. ` +
+                    (new Date() > r.windowEnd
+                        ? `<span style="color:#6B7280;">השקופית הוצגה עד מוצאי שבת מברכין, והחודש הבא תופיע שוב.</span>`
+                        : `השקופית תוצג מ${HEB_DAYS_LABEL(r.windowStart)} ועד מוצאי שבת. ` +
+                          (r.active ? `<b style="color:#059669;">● מוצגת כעת</b>` : `<span style="color:#6B7280;">(עדיין לא מוצגת)</span>`));
+            }
+            return;
+        }
+
+        if (preview) preview.style.display = 'none';
         const roshMonth = document.getElementById('inRoshSelect') ? document.getElementById('inRoshSelect').value : shul.roshMonth;
         const roshType = document.getElementById('inRoshType') ? document.getElementById('inRoshType').value : shul.roshType;
-        const roshDaysOfWeek = document.getElementById('inRoshDaysOfWeek') ? document.getElementById('inRoshDaysOfWeek').value : shul.roshDaysOfWeek;
+        const roshDays = document.getElementById('inRoshDaysOfWeek') ? document.getElementById('inRoshDaysOfWeek').value : shul.roshDaysOfWeek;
+        const roshCount = document.getElementById('inRoshDaysCount') ? document.getElementById('inRoshDaysCount').value : shul.roshDaysCount;
 
         document.getElementById('lblRoshMonthTitle').innerText = `חודש ${roshMonth}`;
-        document.getElementById('lblRoshDeclLine').innerText = `הכרזת ראש חודש ${roshMonth} שחל להיות בימים ${roshDaysOfWeek}.`;
-        let daysNumText = (roshType === "מלא") ? "30 ימים" : "29 ימים";
-        document.getElementById('lblRoshTypeLine').innerText = `חודש ${roshMonth} הוא חודש ${roshType} (בן ${daysNumText}).`;
+        document.getElementById('lblRoshDeclLine').innerText = `הכרזת ראש חודש ${roshMonth} שחל להיות ${roshCount === 'יום אחד' ? 'ביום' : 'בימים'} ${roshDays}.`;
+        document.getElementById('lblRoshTypeLine').innerText =
+            `החודש שמסתיים הוא חודש ${roshType} (בן ${roshType === 'מלא' ? 30 : 29} ימים).`;
     }
 
     function renderMonthlyCalendar() {
@@ -2080,7 +2677,41 @@
         renderMonthlyCalendar();
     }
 
+
+    // ===== סרגל הצד ותפריטי הנפתחים של מסך הניהול =====
+    const SIDEBAR_PREF_KEY = 'shulBoardSidebarNarrow';
+    function sidebarPref() {
+        try { const v = localStorage.getItem(SIDEBAR_PREF_KEY); return v === null ? null : v === '1'; } catch (e) { return null; }
+    }
+    function applySidebarState() {
+        const pref = sidebarPref();
+        const narrow = (pref !== null) ? pref : window.innerWidth < 1000;
+        document.body.classList.toggle('narrow_menu', narrow);
+    }
+    function toggleAdminSidebar() {
+        if (window.innerWidth < 700) { closeAdminMenu(); return; }
+        const narrow = !document.body.classList.contains('narrow_menu');
+        document.body.classList.toggle('narrow_menu', narrow);
+        try { localStorage.setItem(SIDEBAR_PREF_KEY, narrow ? '1' : '0'); } catch (e) {}
+    }
+    function openAdminMenu() { document.body.classList.add('menu_open'); }
+    function closeAdminMenu() { document.body.classList.remove('menu_open'); }
+
+    function closeAllDropdowns() {
+        document.querySelectorAll('.dropdown-container.open').forEach(c => c.classList.remove('open'));
+    }
+    function toggleDropdown(btn, ev) {
+        if (ev) ev.stopPropagation();
+        const box = btn.closest('.dropdown-container');
+        const wasOpen = box.classList.contains('open');
+        closeAllDropdowns();
+        if (!wasOpen) box.classList.add('open');
+    }
+    document.addEventListener('click', closeAllDropdowns);
+    window.addEventListener('resize', () => { if (sidebarPref() === null) applySidebarState(); if (window.innerWidth >= 700) closeAdminMenu(); });
+
     window.onload = function() {
+        applySidebarState();
         initNetworkChecker();
         initLiveClockAndHebcal();
     };
@@ -2187,6 +2818,8 @@
         document.getElementById('inShulDisplayName').value = shul.name;
         document.getElementById('inAdminHeaderTitle').value = shul.adminTitleText || "ניהול מערכת לוח";
         document.getElementById('adminPanelHeaderTitle').innerText = shul.adminTitleText || "ניהול מערכת לוח";
+        const sidebarName = document.getElementById('sidebarShulName');
+        if (sidebarName) sidebarName.innerText = shul.name || "ניהול בית כנסת";
         document.getElementById('adminMenuBtnText').innerText = shul.adminTitleText || "ניהול מערכת לוח";
 
         applyTheme(shul.theme || 'classic');
@@ -2245,7 +2878,8 @@
     }
 
     function applyTheme(themeName) {
-        document.body.className = `theme-${themeName}`;
+        Array.from(document.body.classList).filter(c => c.indexOf('theme-') === 0).forEach(c => document.body.classList.remove(c));
+        document.body.classList.add(`theme-${themeName}`);
         ['classic', 'gold', 'jerusalem', 'sky'].forEach(t => {
             const opt = document.getElementById(`themeOpt_${t}`);
             if(opt) {
@@ -2273,7 +2907,7 @@
 
         if(currentSynagogueKey) {
             dbSynagogues[currentSynagogueKey].isAutoRosh = isChecked;
-            if(isChecked) fetchHebcalData();
+            updateRoshChodeshDisplay();
         }
     }
 
@@ -2341,7 +2975,7 @@
             
             let isWaiting = false;
             let waitingHint = "";
-            if (key === 'rosh' && shul.isAutoRosh && !shul.isRoshActiveNow) {
+            if (key === 'rosh' && shul.isAutoRosh && !(computeRoshChodesh() || {}).active) {
                 isWaiting = true;
                 waitingHint = ` <span style="font-size:11px; color:#D97706; font-weight:normal;">(ממתין לתנאי אוטומטי)</span>`;
             } else if (key === 'yahrtzeit' && shul.isAutoYahrtzeit) {
@@ -2553,10 +3187,10 @@
                 <td>${person.firstName}</td>
                 <td>${person.lastName}</td>
                 <td><b style="color:var(--primary-color);">${fullName}</b></td>
-                <td style="display: flex; gap: 6px; justify-content: center; border: none;">
-                    <button class="control-btn" style="padding: 2px 8px; background: #0284C7; color:white; font-size:12px;" onclick="openEditMemberModal('${listKey}', ${index})">עריכה</button>
-                    <button class="control-btn" style="padding: 2px 8px; background: #EF4444; color:white; font-size:12px;" onclick="confirmRemoveItem('${listKey}', ${index})">מחק</button>
-                </td>
+                <td><div class="row-actions">
+                    <button class="row-btn edit" onclick="openEditMemberModal('${listKey}', ${index})">עריכה</button>
+                    <button class="row-btn del" onclick="confirmRemoveItem('${listKey}', ${index})">מחק</button>
+                </div></td>
             `;
             tbody.appendChild(tr);
         });
@@ -2608,10 +3242,10 @@
                 <td>${y.name}</td>
                 <td>${y.date}</td>
                 <td>${y.shabbat}</td>
-                <td style="display: flex; gap: 6px; justify-content: center; border: none;">
-                    <button class="control-btn" style="padding: 2px 8px; background: #0284C7; color:white; font-size:12px;" onclick="openEditYahrtzeitModal(${index})">עריכה</button>
-                    <button class="control-btn" style="padding: 2px 8px; background: #EF4444; color:white; font-size:12px;" onclick="confirmRemoveYahrtzeit(${index})">מחק</button>
-                </td>
+                <td><div class="row-actions">
+                    <button class="row-btn edit" onclick="openEditYahrtzeitModal(${index})">עריכה</button>
+                    <button class="row-btn del" onclick="confirmRemoveYahrtzeit(${index})">מחק</button>
+                </div></td>
             `;
             tbody.appendChild(tr);
         });
@@ -2935,7 +3569,8 @@
 
     function showScreen(screenId) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(screenId).classList.add('active'); }
     
-    function switchTab(tabId, btnElement) { 
+    function switchTab(tabId, btnElement) {
+        closeAdminMenu();
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); 
         if (btnElement) {
@@ -2947,7 +3582,8 @@
         document.getElementById(tabId).classList.add('active'); 
     }
     
-    function switchTabManually(tabId) { 
+    function switchTabManually(tabId) {
+        closeAdminMenu();
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); 
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); 
         const targetBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
@@ -2990,6 +3626,12 @@
 
         carouselTimer = setTimeout(() => {
             currentCarouselIndex = (currentCarouselIndex + 1) % activeCarouselSlides.length;
+            if (currentCarouselIndex === 0) {
+                // סוף סבב: בונים מחדש את הרשימה, כך ששקופיות אוטומטיות (ראש חודש, יארצייט) נכנסות ויוצאות בזמן גם כשהמסך דולק ימים
+                const previousList = activeCarouselSlides;
+                buildActiveSlidesList();
+                if (activeCarouselSlides.length === 0) activeCarouselSlides = previousList;
+            }
             updateCarouselDisplay();
             scheduleNextSlide();
         }, durationSec * 1000);
@@ -3042,9 +3684,10 @@
     function buildActiveSlidesList() {
         const shul = dbSynagogues[currentSynagogueKey];
         let unsortedSlides = [];
+        updateRoshChodeshDisplay();   // רענון טקסט שקופית ראש חודש לפני בניית הרשימה
 
         if (shul.slidesConfig.torah.active) unsortedSlides.push({ id: 'dynSlide_torah', key: 'torah', order: shul.slidesConfig.torah.order || 1 });
-        if (shul.slidesConfig.rosh.active && shul.isRoshActiveNow) unsortedSlides.push({ id: 'dynSlide_rosh', key: 'rosh', order: shul.slidesConfig.rosh.order || 2 });
+        if (shul.slidesConfig.rosh.active && (computeRoshChodesh() || {}).active) unsortedSlides.push({ id: 'dynSlide_rosh', key: 'rosh', order: shul.slidesConfig.rosh.order || 2 });
         
         let hasYahrtzeitThisWeek = shul.yahrtzeits.some(y => y.shabbat.includes(shul.parasha));
         if (shul.slidesConfig.yahrtzeit.active) {
