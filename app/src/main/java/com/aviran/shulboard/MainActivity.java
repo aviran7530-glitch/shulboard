@@ -1,6 +1,12 @@
 package com.aviran.shulboard;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.UiModeManager;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.provider.Settings;
+import java.util.List;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -25,6 +31,12 @@ import java.io.OutputStream;
 public class MainActivity extends Activity {
 
     private static final int FILE_CHOOSER_REQUEST = 1001;
+    static final String PREFS = "shulboard_prefs";
+    static final String KEY_AUTOSTART = "autoStart";
+    static final String KEY_HIDE_RECENTS = "hideFromRecents";
+    static final String EXTRA_FROM_BOOT = "from_boot";
+
+    private boolean launchedFromBoot = false;
 
     private WebView webView;
     private ValueCallback<Uri[]> filePathCallback;
@@ -37,7 +49,8 @@ public class MainActivity extends Activity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         webView = new WebView(this);
-        webView.setBackgroundColor(0xFF0F172A);
+        launchedFromBoot = getIntent() != null && getIntent().getBooleanExtra(EXTRA_FROM_BOOT, false);
+        webView.setBackgroundColor(0xFF0F2A5C);
         setContentView(webView);
 
         WebSettings ws = webView.getSettings();
@@ -90,7 +103,29 @@ public class MainActivity extends Activity {
             }
         });
 
+        applyRecentsPref(getPrefs().getBoolean(KEY_HIDE_RECENTS, false));
         webView.loadUrl("file:///android_asset/index.html");
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+    }
+
+    private SharedPreferences getPrefs() {
+        return getSharedPreferences(PREFS, MODE_PRIVATE);
+    }
+
+    /** הסתרה/הצגה ברשימת "אפליקציות אחרונות" */
+    private void applyRecentsPref(boolean hide) {
+        try {
+            ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+            List<ActivityManager.AppTask> tasks = am.getAppTasks();
+            if (tasks != null) {
+                for (ActivityManager.AppTask t : tasks) t.setExcludeFromRecents(hide);
+            }
+        } catch (Exception ignored) { }
     }
 
     @Override
@@ -123,16 +158,14 @@ public class MainActivity extends Activity {
                         | View.SYSTEM_UI_FLAG_FULLSCREEN);
     }
 
-    // כפתור "חזור" שולח Escape ל-HTML (חזרה לתפריט מהקרוסלה)
+    // כפתור "חזור" בשלט/בטלפון: ה-HTML מחליט מה לסגור (חלון, מסך וכו')
     @Override
     public void onBackPressed() {
         webView.evaluateJavascript(
-                "(function(){var c=document.getElementById('carouselScreen');"
-                        + "if(c&&c.classList.contains('active')){goHome();return 'handled';}return 'none';})()",
+                "(function(){try{return (typeof handleBackKey==='function')?!!handleBackKey():false;}catch(e){return false;}})()",
                 value -> {
-                    if (value != null && value.contains("none")) {
-                        // לא יוצאים מהאפליקציה בטעות
-                        Toast.makeText(this, "להתנתקות השתמש בכפתור 'התנתק ממערכת'", Toast.LENGTH_SHORT).show();
+                    if (value == null || !value.contains("true")) {
+                        moveTaskToBack(true);
                     }
                 });
     }
@@ -143,8 +176,60 @@ public class MainActivity extends Activity {
         webView.evaluateJavascript("if(typeof persistDB==='function')persistDB();", null);
     }
 
-    /** גשר JS -> אנדרואיד: שמירת קבצים מיוצאים לתיקיית ההורדות */
+    /** גשר JS -> אנדרואיד */
     public class Bridge {
+        @JavascriptInterface
+        public boolean isTv() {
+            try {
+                UiModeManager um = (UiModeManager) getSystemService(UI_MODE_SERVICE);
+                if (um != null && um.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) return true;
+                return !getPackageManager().hasSystemFeature("android.hardware.touchscreen");
+            } catch (Exception e) { return false; }
+        }
+
+        @JavascriptInterface
+        public boolean launchedFromBoot() { return launchedFromBoot; }
+
+        @JavascriptInterface
+        public void setAutoStart(boolean on) {
+            getPrefs().edit().putBoolean(KEY_AUTOSTART, on).apply();
+        }
+
+        @JavascriptInterface
+        public void setShowInRecents(boolean show) {
+            getPrefs().edit().putBoolean(KEY_HIDE_RECENTS, !show).apply();
+            runOnUiThread(() -> applyRecentsPref(!show));
+        }
+
+        @JavascriptInterface
+        public boolean canDrawOverlays() {
+            return Build.VERSION.SDK_INT < 23 || Settings.canDrawOverlays(MainActivity.this);
+        }
+
+        @JavascriptInterface
+        public void openOverlaySettings() {
+            runOnUiThread(() -> {
+                try {
+                    startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            Uri.parse("package:" + getPackageName())));
+                } catch (Exception e1) {
+                    try {
+                        startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                Uri.parse("package:" + getPackageName())));
+                    } catch (Exception e2) {
+                        Toast.makeText(MainActivity.this,
+                                "פתחו: הגדרות > אפליקציות > לוח מודעות > הצגה מעל אפליקציות אחרות",
+                                Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void exitApp() {
+            runOnUiThread(() -> finishAffinity());
+        }
+
         @JavascriptInterface
         public void saveFile(String name, String base64, String mime) {
             try {

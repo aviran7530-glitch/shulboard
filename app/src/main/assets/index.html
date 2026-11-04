@@ -79,12 +79,19 @@
             overflow: hidden;
             transition: background-color 0.3s, color 0.3s;
         }
+        #uiRoot {
+            position: absolute; top: 0; left: 0;
+            width: calc(100vw / var(--ui-scale, 1));
+            height: calc(100vh / var(--ui-scale, 1));
+            transform: scale(var(--ui-scale, 1));
+            transform-origin: 0 0;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+        }
 
         .app-container {
-            width: 100vw;
-            height: 100vh;
-            max-width: 1280px;
-            max-height: 720px;
+            width: 100%;
+            height: 100%;
             background: var(--bg-color);
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             display: flex;
@@ -178,13 +185,15 @@
 
         .login-box {
             background: var(--card-bg);
-            padding: 36px 40px;
-            border-radius: 16px;
+            padding: 24px 30px;
+            border-radius: 14px;
             border: 1px solid var(--border-color);
-            width: 400px;
+            width: 360px;
+            max-width: 92%;
+            box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 10px;
             box-shadow: var(--theme-shadow);
         }
 
@@ -222,21 +231,21 @@
         }
 
         h1.main-title {
-            font-size: 36px;
+            font-size: 30px;
             color: var(--text-main);
-            margin-bottom: 20px;
+            margin: 0 0 16px 0;
         }
 
         .btn {
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 14px 28px;
-            font-size: 18px;
+            padding: 10px 20px;
+            font-size: 16px;
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
-            margin: 8px;
+            margin: 6px;
             width: 100%;
             transition: opacity 0.2s;
         }
@@ -602,7 +611,15 @@
             gap: 14px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
             z-index: 10;
-            transition: all 0.3s ease;
+            transition: opacity 0.35s ease, transform 0.35s ease, background 0.3s ease;
+            opacity: 0;
+            transform: translateY(14px);
+            pointer-events: none;
+        }
+        .glass-slide-control.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
         }
 
         .glass-slide-control:hover {
@@ -774,9 +791,9 @@
 
         .modal-overlay {
             display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.4);
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.45);
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -784,14 +801,16 @@
         .modal-box {
             background: var(--card-bg);
             color: var(--text-main);
-            padding: 28px;
-            border-radius: 16px;
-            width: 520px;
-            max-height: 90vh;
+            padding: 20px 24px;
+            border-radius: 14px;
+            width: 440px;
+            max-width: 92%;
+            box-sizing: border-box;
+            max-height: 88%;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 10px;
             box-shadow: var(--theme-shadow);
             border: 1px solid var(--border-color);
         }
@@ -801,12 +820,14 @@
             font-weight: bold;
         }
         .modal-box input, .modal-box select, .modal-box textarea {
-            padding: 10px;
+            padding: 8px 10px;
             background: var(--bg-color);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             color: var(--text-main);
             font-size: 14px;
+            box-sizing: border-box;
+            max-width: 100%;
         }
 
         .time-cards-container {
@@ -949,17 +970,17 @@
 
         /* עיצוב התראת Toast בסגנון אנדרואיד */
         #androidToast {
-            position: fixed;
-            bottom: 30px;
+            position: absolute;
+            bottom: 12px;
             left: 50%;
-            transform: translateX(-50%) translateY(100px);
+            transform: translateX(-50%) translateY(60px);
             background-color: #323232;
             color: #FFFFFF;
-            padding: 12px 24px;
-            border-radius: 24px;
-            font-size: 14px;
+            padding: 5px 14px;
+            border-radius: 16px;
+            font-size: 11.5px;
             font-weight: bold;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
             z-index: 9999;
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.3s;
             display: flex;
@@ -1296,9 +1317,10 @@
 
         /* ----- תחתית: פעולות ----- */
         .footer-actions {
-            flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
-            padding: 10px 18px; background: var(--soft-fill); border-top: 1px solid var(--border-color);
+            flex: none; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px;
+            padding: 8px 16px; background: var(--soft-fill); border-top: 1px solid var(--border-color);
         }
+        .footer-actions .btn-modern { padding: 7px 14px; font-size: 13px; }
 
         /* ----- מובייל: סרגל צד נפתח כמגירה ----- */
         .admin-backdrop { display: none; }
@@ -1331,9 +1353,63 @@
             #sub5 .congregants-table th:nth-child(4), #sub5 .congregants-table td:nth-child(4) { display: none; }
             .congregants-table th, .congregants-table td { padding: 9px 8px; }
         }
-    </style>
+    
+        /* ===== v3: שער פתיחה ===== */
+        .splash {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5000;
+            background: radial-gradient(circle at 50% 38%, #1d4f9c 0%, #0f2a5c 70%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.6s ease; font-family: 'Assistant', system-ui, sans-serif;
+        }
+        .splash.hide { opacity: 0; pointer-events: none; }
+        .splash-logo { width: 170px; height: 170px; object-fit: contain; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); }
+        .splash-title { margin-top: 22px; color: #fff; font-size: 30px; font-weight: 800; letter-spacing: 0.5px; }
+        .splash-copy { position: absolute; bottom: 14px; left: 0; right: 0; text-align: center; color: rgba(255,255,255,0.45); font-size: 11px; }
+
+        /* ===== v3: כרטיסי הגדרות ===== */
+        .set-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; }
+        .set-card h3 { margin: 0 0 6px 0; color: var(--primary-color); font-size: 16px; }
+        .set-note { font-size: 12.5px; color: var(--text-secondary); margin: 0 0 12px 0; line-height: 1.5; }
+        .set-subnote { font-size: 12px; color: #B45309; margin: -2px 0 8px 0; padding-right: 30px; line-height: 1.5; }
+        .set-readout { margin-top: 10px; font-size: 12.5px; color: var(--text-secondary); }
+        .pin-status { font-weight: bold; color: #059669; }
+        .pin-status.warn { color: #D97706; }
+        .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+        .chip { border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main); border-radius: 999px; padding: 7px 16px; font-size: 13px; font-weight: bold; cursor: pointer; font-family: inherit; }
+        .chip.active { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+        .switch-row { display: flex; align-items: flex-start; gap: 12px; padding: 9px 4px; cursor: pointer; border-top: 1px solid var(--border-color); }
+        .switch-row:first-of-type { border-top: none; }
+        .switch-row input { width: 20px; height: 20px; margin-top: 2px; flex: none; cursor: pointer; }
+        .switch-row b { display: block; font-size: 14px; color: var(--text-main); }
+        .switch-row small { display: block; font-size: 12px; color: var(--text-secondary); font-weight: normal; margin-top: 2px; }
+        .auto-assign-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-color); flex-wrap: wrap; }
+        .auto-assign-text { display: flex; flex-direction: column; gap: 2px; font-size: 13px; min-width: 200px; flex: 1; }
+        .auto-assign-text span { font-size: 12px; color: var(--text-secondary); font-weight: normal; }
+        .donors-hint { margin-top: 10px; font-size: 12px; color: var(--text-secondary); }
+        .modal-actions { display: flex; gap: 8px; margin-top: 6px; }
+        .modal-actions .btn { flex: 1; padding: 9px 14px; font-size: 15px; }
+
+        /* ===== v3: שקופית נדיבי עם ===== */
+        .donors-card { justify-content: flex-start; align-items: stretch; padding: 14px 20px; overflow: hidden; min-height: 0; }
+        .donors-table-wrap { flex: 1; min-height: 0; overflow: hidden; position: relative; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-color); }
+        .donors-table { width: 100%; border-collapse: collapse; font-size: var(--donor-fs, 20px); }
+        .donors-table th { position: sticky; top: 0; background: var(--primary-color); color: #fff; padding: 9px 12px; font-size: 0.85em; z-index: 1; }
+        .donors-table td { padding: 6px 12px; border-top: 1px solid var(--border-color); text-align: center; color: var(--text-main); font-weight: 600; }
+        .donors-table tbody tr:nth-child(even) td { background: rgba(127,127,127,0.07); }
+        .donors-table td:first-child { color: var(--primary-color); font-weight: 800; }
+        .donors-table.scrolling { animation: donorScroll var(--donor-dur, 20s) ease-in-out infinite alternate; }
+        .donors-empty { padding: 30px; color: var(--text-secondary); font-size: 18px; text-align: center; }
+        .donors-blessing { margin: 10px 0 0 0; text-align: center; font-weight: bold; color: var(--primary-color); font-size: 16px; line-height: 1.5; }
+        @keyframes donorScroll { from { transform: translateY(0); } to { transform: translateY(calc(-1 * var(--donor-shift, 0px))); } }
+
+        /* ===== v3: ניווט בשלט ===== */
+        body.remote-mode *:focus-visible, body.remote-mode *:focus { outline: 3px solid var(--accent-color) !important; outline-offset: 2px; }
+        .num-editing { outline: 3px solid #F59E0B !important; background: rgba(245,158,11,0.12) !important; }
+        [inert] { pointer-events: none; user-select: none; }
+</style>
 </head>
 <body class="theme-classic">
+<div id="uiRoot">
 
 <!-- רכיב התראת Toast בסגנון אנדרואיד -->
 <div id="androidToast">בודק חיבור רשת...</div>
@@ -1355,10 +1431,17 @@
         </div>
     </div>
 
+    <!-- Splash gate -->
+    <div id="splashScreen" class="splash">
+        <img src="logo.png" alt="" class="splash-logo">
+        <div class="splash-title">מערכת גבאי בית כנסת</div>
+        <div class="splash-copy">© כל הזכויות שמורות 2026 לאבירן א. חיים</div>
+    </div>
+
     <!-- 0. Login Screen -->
     <div id="loginScreen" class="screen active">
         <div class="login-box" style="margin: auto;">
-            <h2 style="color: var(--primary-color); margin-top:0; margin-bottom:4px;">כניסת מנהל בית כנסת</h2>
+            <h2 style="color: var(--primary-color); margin:0 0 2px 0; font-size:21px;">כניסת מנהל בית כנסת</h2>
             
             <div id="loginErrorMsg" class="login-error-msg">שם משתמש או סיסמה שגויים!</div>
 
@@ -1372,7 +1455,7 @@
                 <input type="password" id="loginPassword" value="123456" style="width: 100%; box-sizing: border-box;">
             </div>
 
-            <button class="btn" style="margin-top: 6px;" onclick="handleLogin()">התחבר למערכת</button>
+            <button class="btn" style="margin-top: 6px;" id="loginBtn" onclick="handleLogin()">התחבר למערכת</button>
 
             <div class="login-links">
                 <a onclick="openRegisterModal()">יצירת חשבון חדש</a>
@@ -1389,13 +1472,13 @@
     <div id="mainMenuScreen" class="screen" style="justify-content: center; align-items: center; text-align: center;">
         <div>
             <h1 class="main-title" id="welcomeTitle">לוח מודעות בית כנסת</h1>
-            <div style="width: 280px; margin: 0 auto;">
+            <div style="width: 260px; margin: 0 auto;">
                 <button class="btn" onclick="startCarousel()">כניסה ללוח מודעות</button>
-                <button class="btn btn-secondary" onclick="openAdmin()" id="adminMenuBtnText">ניהול מערכת לוח</button>
+                <button class="btn btn-secondary" onclick="requestAdmin()" id="adminMenuBtnText">ניהול מערכת לוח</button>
                 <button class="btn" style="background-color: #EF4444; margin-top: 20px;" onclick="confirmLogout()">התנתק ממערכת</button>
             </div>
         </div>
-        <div style="font-size: 12px; color: var(--text-secondary); font-weight: normal; margin-bottom: 10px;">
+        <div style="position:absolute; bottom:10px; left:0; right:0; font-size: 12px; color: var(--text-secondary); font-weight: normal;">
             © כל הזכויות שמורות 2026 לאבירן א. חיים
         </div>
     </div>
@@ -1504,9 +1587,28 @@
                     <span>"וְלִמַּדְתֶּם אֹתָם אֶת בְּנֵי כֶלֶם"</span>
                 </div>
             </div>
-        </div>
 
-        <div class="glass-slide-control">
+        <!-- Slide: Donors -->
+        <div id="dynSlide_donors" class="carousel-slide" style="display:none; height:100%; flex-direction:column; justify-content:space-between;">
+            <div class="slide-header">🤝 נדיבי עם – רשימת השותפים והתורמים</div>
+            <div class="center-card donors-card">
+                <div class="donors-table-wrap" id="donorsTableWrap">
+                    <table class="donors-table" id="donorsSlideTable">
+                        <thead><tr><th>שם התורם</th><th>הזכות</th><th>נדבת הלב</th></tr></thead>
+                        <tbody id="donorsSlideBody"></tbody>
+                    </table>
+                </div>
+                <p class="donors-blessing" id="lblDonorsBlessing"></p>
+            </div>
+            <div class="footer-note">
+                <span id="lblSynagogueFooter5">בית כנסת</span>
+                <span>© כל הזכויות שמורות 2026 לאבירן א. חיים</span>
+                <span>"וְלִמַּדְתֶּם אֹתָם אֶת בְּנֵי כֶלֶם"</span>
+            </div>
+        </div>
+        </div><!-- /dynamicCarouselContainer -->
+
+        <div class="glass-slide-control" id="carouselControls">
             <button class="glass-btn" onclick="goHome()" title="חזרה לתפריט הראשי (Esc)">
                 <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
             </button>
@@ -1553,7 +1655,8 @@
                     <button class="tab-btn" title="זמנים" onclick="switchTab('tabTimes', this)"><span class="icon-box">🕒</span><span class="item-label">זמנים</span></button>
                     <button class="tab-btn" title="ניהול שקופיות" onclick="switchTab('tabSlides', this)"><span class="icon-box">🎛️</span><span class="item-label">ניהול שקופיות</span></button>
                     <button class="tab-btn" title="ערכת נושא" onclick="switchTab('tabTheme', this)"><span class="icon-box">🎨</span><span class="item-label">ערכת נושא</span></button>
-                    <button class="tab-btn" title="הגדרות כותרות" onclick="switchTab('tabSettings', this)"><span class="icon-box">⚙️</span><span class="item-label">הגדרות כותרות</span></button>
+                    <button class="tab-btn" title="רזולוציה" onclick="switchTab('tabResolution', this)"><span class="icon-box">🖥️</span><span class="item-label">רזולוציה</span></button>
+                    <button class="tab-btn" title="הגדרות" onclick="switchTab('tabSettings', this)"><span class="icon-box">⚙️</span><span class="item-label">הגדרות</span></button>
                 </nav>
                 <div class="aside-foot hide-on-narrow">גרסה 2027 • מערכת בית כנסת</div>
             </aside>
@@ -1581,6 +1684,10 @@
                             </label>
                         </div>
                         <select id="inUnifiedParashaSelect" style="width: 100%; box-sizing: border-box;"></select>
+                        <div class="auto-assign-row">
+                            <div class="auto-assign-text"><b>✨ שיבוץ אוטומטי לעליות</b><span>מחלק את המועמדים לעליות לפי הסדר ברשימה (ממשיך מהמקום שבו עצרת)</span></div>
+                            <button type="button" class="btn-modern btn-modern-secondary" onclick="confirmAutoRotation()">✨ הרץ שיבוץ אוטומטי</button>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -1727,13 +1834,13 @@
                     <button class="sub-tab-btn" onclick="switchSubTab('sub3', this)">3. הוצאת ספר תורה</button>
                     <button class="sub-tab-btn" onclick="switchSubTab('sub4', this)">4. רשימת יארצייט</button>
                     <button class="sub-tab-btn" onclick="switchSubTab('sub5', this)">5. חזן שבת</button>
+                    <button class="sub-tab-btn" onclick="switchSubTab('sub6', this)">6. נדיבי עם</button>
                 </div>
 
                 <div id="sub1" class="sub-content active">
                     <div class="modern-toolbar">
                         <div class="tb-group">
                             <button class="btn-modern btn-modern-primary" onclick="openAddMemberModal('congregants', 'מועמד לעליות')">＋ הוסף מועמד</button>
-                            <button class="btn-modern btn-modern-secondary" onclick="confirmAutoRotation()">✨ שיבוץ אוטומטי</button>
                         </div>
                         <div class="dropdown-container">
                             <button class="btn-modern btn-modern-outline" onclick="toggleDropdown(this, event)">📁 ניהול קבצים <span style="font-size:10px; opacity:.7;">▼</span></button>
@@ -1809,6 +1916,25 @@
                     </div>
                     <div class="table-wrap"><table class="congregants-table"><thead><tr><th>מיקום</th><th>שם פרטי</th><th>שם משפחה</th><th>שם מלא (תצוגה)</th><th>פעולות</th></tr></thead><tbody id="tableBody4"></tbody></table></div>
                 </div>
+                <div id="sub6" class="sub-content">
+                    <div class="modern-toolbar">
+                        <div class="tb-group">
+                            <button class="btn-modern btn-modern-primary" onclick="openDonorModal(-1)">＋ הוסף תורם</button>
+                            <button class="btn-modern btn-modern-outline" onclick="sortDonors()">🔤 מיון לפי שם</button>
+                            <button class="btn-modern btn-modern-outline" onclick="confirmClearDonors()">🗑 נקה את כל הרשימה</button>
+                        </div>
+                        <div class="dropdown-container">
+                            <button class="btn-modern btn-modern-outline" onclick="toggleDropdown(this, event)">📁 ניהול קבצים <span style="font-size:10px; opacity:.7;">▼</span></button>
+                            <div class="dropdown-menu">
+                                <label class="dropdown-item" for="fileImportInputDonors">📥 ייבוא מ-Excel<input type="file" id="fileImportInputDonors" accept=".xlsx, .xls" style="display:none;" onchange="handleDonorsImport(event)"></label>
+                                <button class="dropdown-item" onclick="closeAllDropdowns(); exportDonorsExcel()">📤 ייצוא ל-Excel</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-wrap"><table class="congregants-table"><thead><tr><th>#</th><th>שם התורם</th><th>הזכות</th><th>נדבת הלב</th><th>פעולות</th></tr></thead><tbody id="donorsTableBody"></tbody></table></div>
+                    <div class="donors-hint">השקופית "נדיבי עם" מוצגת בלוח לפי ההגדרה בלשונית "ניהול שקופיות". טקסט הברכה שמתחת לטבלה נערך בלשונית "הגדרות".</div>
+                </div>
+
             </div>
 
             <div id="tabCalendar" class="tab-content">
@@ -1929,11 +2055,38 @@
                 </div>
             </div>
 
+            <div id="tabResolution" class="tab-content">
+                <div class="set-card">
+                    <h3>🖥️ גודל הממשק והרזולוציה</h3>
+                    <p class="set-note">התאמת גודל מסכי הניהול וחלונות הדו-שיח למסך שלך. השקופיות בלוח תמיד מתמלאות על כל המסך. ההגדרה נשמרת במכשיר הזה בלבד.</p>
+                    <div class="chip-row" id="uiScaleChips">
+                        <button type="button" class="chip" data-scale="auto" onclick="setUiScale('auto')">⚡ אוטומטי (מומלץ)</button>
+                        <button type="button" class="chip" data-scale="0.7" onclick="setUiScale('0.7')">קטן מאוד</button>
+                        <button type="button" class="chip" data-scale="0.85" onclick="setUiScale('0.85')">קטן</button>
+                        <button type="button" class="chip" data-scale="1" onclick="setUiScale('1')">רגיל</button>
+                        <button type="button" class="chip" data-scale="1.2" onclick="setUiScale('1.2')">גדול</button>
+                        <button type="button" class="chip" data-scale="1.4" onclick="setUiScale('1.4')">גדול מאוד</button>
+                    </div>
+                    <div class="set-readout" id="uiScaleReadout"></div>
+                </div>
+                <div class="set-card">
+                    <h3>🎮 מצב שלט (טלוויזיה)</h3>
+                    <p class="set-note">במצב שלט ניתן לנווט בכל המסכים עם החצים, אישור (OK) וחזור. במכשיר טלוויזיה זה מתעדכן אוטומטית.</p>
+                    <div class="chip-row" id="remoteModeChips">
+                        <button type="button" class="chip" data-mode="auto" onclick="setRemoteMode('auto')">⚡ אוטומטי</button>
+                        <button type="button" class="chip" data-mode="on" onclick="setRemoteMode('on')">פעיל</button>
+                        <button type="button" class="chip" data-mode="off" onclick="setRemoteMode('off')">כבוי</button>
+                    </div>
+                </div>
+                <div class="set-card">
+                    <button type="button" class="btn-modern btn-modern-outline" onclick="resetDeviceSettings()">↩ איפוס הגדרות תצוגה</button>
+                </div>
+            </div>
+
             <div id="tabSettings" class="tab-content">
-                <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
-                    <h3 style="color: var(--primary-color); margin-top: 0; margin-bottom: 10px;">⚙️ ניהול כותרות ושמות מערכת</h3>
-                    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">כאן תוכל לשנות את שם בית הכנסת שמופיע בכל השקופיות ואת כותרת מסך הניהול.</p>
-                    
+                <div class="set-card">
+                    <h3>⚙️ כותרות ושמות</h3>
+                    <p class="set-note">שם בית הכנסת שמופיע בשקופיות וכותרת מסך הניהול.</p>
                     <div class="form-grid">
                         <div class="form-group full-width">
                             <label>שם בית הכנסת (מופיע בתחתית השקופיות):</label>
@@ -1943,13 +2096,49 @@
                             <label>כותרת מסך ניהול מערכת:</label>
                             <input type="text" id="inAdminHeaderTitle" placeholder="למשל: ניהול מערכת לוח">
                         </div>
+                        <div class="form-group full-width">
+                            <label>ברכה בשקופית "נדיבי עם" (מתחת לטבלת התורמים):</label>
+                            <textarea id="inDonorsBlessing" rows="3" placeholder="הקדוש ברוך הוא ישלם שכרם..."></textarea>
+                        </div>
                     </div>
+                </div>
+
+                <div class="set-card">
+                    <h3>🔒 אבטחה וחשבון</h3>
+                    <p class="set-note">הלוח פתוח לצפייה לכולם. הכניסה ל"ניהול" דורשת סיסמת ניהול. <span id="pinStatus" class="pin-status"></span></p>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>סיסמת ניהול חדשה:</label>
+                            <input type="password" id="inAdminPin" autocomplete="new-password" placeholder="השאר ריק כדי לא לשנות">
+                        </div>
+                        <div class="form-group">
+                            <label>אימות סיסמת ניהול:</label>
+                            <input type="password" id="inAdminPin2" autocomplete="new-password" placeholder="הקלד שוב">
+                        </div>
+                        <div class="form-group">
+                            <label>שם משתמש של החשבון:</label>
+                            <input type="text" id="inAccUser">
+                        </div>
+                        <div class="form-group">
+                            <label>סיסמת חשבון חדשה:</label>
+                            <input type="password" id="inAccPass" autocomplete="new-password" placeholder="השאר ריק כדי לא לשנות">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="set-card">
+                    <h3>📺 הפעלה במכשיר</h3>
+                    <p class="set-note">הגדרות אלה חלות על המכשיר הזה (טלוויזיה / טלפון) ונשמרות מיד.</p>
+                    <label class="switch-row"><input type="checkbox" id="optAutoStart" onchange="onAutoStartToggle(this.checked)"><span><b>הפעלה אוטומטית בהדלקת הטלוויזיה</b><small>האפליקציה נפתחת מעצמה בהדלקה ומציגה ישר את שקופיות הלוח</small></span></label>
+                    <div class="set-subnote" id="autoStartNote"></div>
+                    <label class="switch-row"><input type="checkbox" id="optStayLogged" onchange="onStayLoggedToggle(this.checked)"><span><b>השאר את החשבון מחובר במכשיר</b><small>בלי זה לא ניתן לפתוח ישר את הלוח אחרי הדלקה</small></span></label>
+                    <label class="switch-row"><input type="checkbox" id="optShowInRecents" onchange="onRecentsToggle(this.checked)"><span><b>הצג ברשימת האפליקציות האחרונות</b><small>כבוי = האפליקציה מוסתרת מרשימת "אפליקציות ברקע"</small></span></label>
                 </div>
             </div>
 
             <div class="footer-actions">
-                <button class="btn-modern btn-modern-run" onclick="saveChangesAndShow()">▶ שמור והצג בלוח</button>
                 <button class="btn-modern btn-modern-primary" onclick="saveChangesOnly()">💾 שמור שינויים</button>
+                <button class="btn-modern btn-modern-run" onclick="saveChangesAndShow()">▶ שמור והצג בלוח</button>
                 <button class="btn-modern btn-modern-outline" onclick="confirmCancel()">ביטול</button>
             </div>
             </div><!-- /admin-container -->
@@ -1966,7 +2155,7 @@
         <div class="form-group"><label>שם בית הכנסת *</label><input type="text" id="regShulName" placeholder="דוגמה: בית כנסת [שם הבית כנסת]"></div>
         <div class="form-group"><label>אימייל מנהל (שם משתמש) *</label><input type="email" id="regEmail" placeholder="admin@synagogue.com"></div>
         <div class="form-group"><label>סיסמה זמנית / חדשה *</label><input type="password" id="regPassword" placeholder="******"></div>
-        <div style="display:flex; gap:10px; margin-top:10px;">
+        <div class="modal-actions">
             <button class="btn" style="background:#059669; margin:0;" onclick="submitRegister()">צור חשבון והתחבר</button>
             <button class="btn btn-secondary" style="margin:0;" onclick="closeRegisterModal()">ביטול</button>
         </div>
@@ -1978,7 +2167,7 @@
         <h3 style="margin:0; color:var(--primary-color);">🔑 שחזור פרטי התחברות</h3>
         <p style="font-size: 13px; color: var(--text-secondary); margin:0;">הזינו את כתובת האימייל של בית הכנסת, ונשלח אליכם הוראות לאיפוס הסיסמה.</p>
         <div class="form-group"><label>אימייל בית הכנסת *</label><input type="email" id="forgotEmail" value="Haim@gmail.com"></div>
-        <div style="display:flex; gap:10px; margin-top:10px;">
+        <div class="modal-actions">
             <button class="btn" style="background:var(--primary-color); margin:0;" onclick="submitForgot()">שלח הוראות שחזור</button>
             <button class="btn btn-secondary" style="margin:0;" onclick="closeForgotModal()">ביטול</button>
         </div>
@@ -1987,7 +2176,7 @@
 
 <!-- Modal: יצירת שקופית חדשה מותאמת אישית עם סרגל עריכה מעודכן לאייקונים -->
 <div id="customSlideModal" class="modal-overlay">
-    <div class="modal-box" style="width: 600px;">
+    <div class="modal-box" style="width: 560px;">
         <h3 style="margin:0; color:var(--primary-color);">✨ יצירת שקופית חדשה מותאמת אישית</h3>
         
         <div class="form-group">
@@ -2084,7 +2273,7 @@
             </div>
         </div>
 
-        <div style="display:flex; gap:10px; margin-top:10px;">
+        <div class="modal-actions">
             <button class="btn" style="background:var(--primary-color); margin:0;" onclick="submitCustomSlide()">+ הוסף שקופית לקרוסלה</button>
             <button class="btn btn-secondary" style="margin:0;" onclick="closeAddCustomSlideModal()">ביטול</button>
         </div>
@@ -2097,7 +2286,7 @@
         <div class="form-group"><label>שם פרטי *</label><input type="text" id="modalFirstName" placeholder="דוגמה: מנחם"></div>
         <div class="form-group"><label>שם משפחה *</label><input type="text" id="modalLastName" placeholder="דוגמה: שאול"></div>
         <div class="form-group"><label>מספר מיקום ברשימה *</label><input type="number" id="modalSeatIndex" placeholder="דוגמה: 1"></div>
-        <div style="display:flex; gap:10px; margin-top:10px;">
+        <div class="modal-actions">
             <button class="btn" style="background:var(--primary-color); margin:0;" onclick="submitNewMember()">+ הוסף לרשימה</button>
             <button class="btn btn-secondary" style="margin:0;" onclick="closeAddMemberModal()">ביטול</button>
         </div>
@@ -2110,7 +2299,7 @@
         <div class="form-group"><label>שם פרטי *</label><input type="text" id="editFirstName"></div>
         <div class="form-group"><label>שם משפחה *</label><input type="text" id="editLastName"></div>
         <div class="form-group"><label>מספר מיקום ברשימה *</label><input type="number" id="editSeatIndex"></div>
-        <div style="display:flex; gap:10px; margin-top:10px;">
+        <div class="modal-actions">
             <button class="btn" style="background:var(--primary-color); margin:0;" onclick="submitEditMember()">שמור שינויים</button>
             <button class="btn btn-secondary" style="margin:0;" onclick="closeEditMemberModal()">ביטול</button>
         </div>
@@ -2129,7 +2318,7 @@
         <div class="form-group"><label>שם הנפטר/ת *</label><input type="text" id="editYName"></div>
         <div class="form-group"><label>תאריך פטירה (יום ועברי) *</label><input type="text" id="editYDate"></div>
         <div class="form-group"><label>שבת אזכרה / פרשה *</label><input type="text" id="editYShabbat"></div>
-        <div style="display:flex; gap:10px; margin-top:10px;">
+        <div class="modal-actions">
             <button class="btn" style="background:var(--primary-color); margin:0;" onclick="submitEditYahrtzeit()">שמור שינויים</button>
             <button class="btn btn-secondary" style="margin:0;" onclick="closeEditYahrtzeitModal()">ביטול</button>
         </div>
@@ -2162,9 +2351,38 @@
         </div>
         <div class="form-group"><label>תאריך פטירה (יום ועברי) *</label><input type="text" id="modalYDate" placeholder="דוגמה: ח' תשרי"></div>
         <div class="form-group"><label>שבת אזכרה / פרשה *</label><input type="text" id="modalYShabbat" placeholder="דוגמה: פרשת וילך - שבת שובה"></div>
-        <div style="display:flex; gap:10px; margin-top:10px;">
+        <div class="modal-actions">
             <button class="btn" style="background:var(--primary-color); margin:0;" onclick="submitNewYahrtzeit()">+ הוסף לרשימה</button>
             <button class="btn btn-secondary" style="margin:0;" onclick="closeAddYahrtzeitModal()">ביטול</button>
+        </div>
+    </div>
+</div>
+
+<div id="pinModal" class="modal-overlay" data-enter-submit="pinSubmitBtn">
+    <div class="modal-box" style="width: 360px;">
+        <h3 id="pinTitle" style="margin:0; color:var(--primary-color);">🔒 כניסה לניהול</h3>
+        <p id="pinMsg" class="set-note" style="margin:0;">הקלידו את סיסמת הניהול.</p>
+        <div id="pinError" class="login-error-msg">הסיסמה שגויה</div>
+        <div class="form-group"><label id="pinLabel1">סיסמת ניהול</label><input type="password" id="pinInput1" autocomplete="off"></div>
+        <div class="form-group" id="pinRow2" style="display:none;"><label>אימות הסיסמה</label><input type="password" id="pinInput2" autocomplete="off"></div>
+        <div class="modal-actions">
+            <button class="btn" id="pinSubmitBtn" style="margin:0;" onclick="submitPin()">אישור</button>
+            <button class="btn btn-secondary" id="pinSkipBtn" style="margin:0; display:none;" onclick="skipPin()">דלג כעת</button>
+            <button class="btn btn-secondary" style="margin:0;" onclick="closePinModal()">ביטול</button>
+        </div>
+    </div>
+</div>
+
+<div id="donorModal" class="modal-overlay">
+    <div class="modal-box" style="width: 420px;">
+        <h3 id="donorModalTitle" style="margin:0; color:var(--primary-color);">🤝 הוספת תורם</h3>
+        <div class="form-group"><label>שם התורם *</label><input type="text" id="donorName" placeholder="דוגמה: משפחת כהן"></div>
+        <div class="form-group"><label>הזכות</label><input type="text" id="donorMerit" placeholder="דוגמה: הוצאת ספר תורה / לעילוי נשמת..."></div>
+        <div class="form-group"><label>נדבת הלב</label><input type="text" id="donorAmount" placeholder="דוגמה: 360 ₪"></div>
+        <div class="form-group"><label>מיקום ברשימה</label><input type="number" id="donorPos" min="1"></div>
+        <div class="modal-actions">
+            <button class="btn" id="donorSaveBtn" style="background:var(--primary-color); margin:0;" onclick="submitDonor()">שמור</button>
+            <button class="btn btn-secondary" style="margin:0;" onclick="closeDonorModal()">ביטול</button>
         </div>
     </div>
 </div>
@@ -2174,11 +2392,13 @@
         <h3 id="confirmTitle" style="margin:0; color:var(--primary-color);">⚠️ אישור פעולה</h3>
         <p id="confirmMessage" style="font-size: 15px; color: var(--text-main); margin: 15px 0;"></p>
         <div style="display: flex; gap: 12px; justify-content: center; margin-top: 10px;">
-            <button class="btn" id="confirmYesBtn" style="background: #EF4444; margin:0; flex:1;">אישור</button>
+            <button class="btn" id="confirmYesBtn" data-autofocus style="background: #EF4444; margin:0; flex:1;">אישור</button>
             <button class="btn btn-secondary" style="margin:0; flex:1;" onclick="closeConfirmModal()">ביטול</button>
         </div>
     </div>
 </div>
+
+</div><!-- /uiRoot -->
 
 <script>
     const chumashimParashot = {
@@ -2267,7 +2487,70 @@
     window.addEventListener('pagehide', persistDB);
     document.addEventListener('visibilitychange', () => { if (document.hidden) persistDB(); });
 
+
+    // ===================== v3: ברירות מחדל / הגדרות מכשיר =====================
+    const DEFAULT_DONORS_BLESSING = '״הקדוש ברוך הוא ישלם שכרם, ויסיר מהם כל מחלה, וירפא לכל גופם, ויסלח לכל עוונם, וישלח ברכה והצלחה בכל מעשה ידיהם״';
+    function ensureDefaults(shul) {
+        if (!shul) return;
+        if (!Array.isArray(shul.donors)) shul.donors = [];
+        if (typeof shul.donorsBlessing !== 'string') shul.donorsBlessing = DEFAULT_DONORS_BLESSING;
+        if (typeof shul.adminPin !== 'string') shul.adminPin = '';
+        if (!shul.slidesConfig) shul.slidesConfig = {};
+        if (!shul.slidesConfig.donors) shul.slidesConfig.donors = { name: "נדיבי עם – רשימת התורמים", active: false, duration: 8, order: 5 };
+        if (!Array.isArray(shul.customSlides)) shul.customSlides = [];
+    }
+    Object.keys(dbSynagogues).forEach(k => ensureDefaults(dbSynagogues[k]));
+
+    const DEVICE_KEY = 'shulBoardDevice_v1';
+    let device = { uiScale: 'auto', remote: 'auto', autoStart: false, stayLogged: true, showInRecents: true, lastUser: null };
+    try { Object.assign(device, JSON.parse(localStorage.getItem(DEVICE_KEY) || '{}')); } catch (e) {}
+    function saveDevice() { try { localStorage.setItem(DEVICE_KEY, JSON.stringify(device)); } catch (e) {} }
+    function $(id) { return document.getElementById(id); }
+    function nativeCall(fn, ...args) {
+        try { if (window.AndroidBridge && typeof window.AndroidBridge[fn] === 'function') return window.AndroidBridge[fn](...args); } catch (e) { console.error(e); }
+        return undefined;
+    }
+    function isNativeApp() { return !!window.AndroidBridge; }
+
+    // ----- קנה מידה של הממשק (רזולוציה) -----
+    function baseScale() {
+        const w = window.innerWidth, h = window.innerHeight;
+        if (w >= 900 && h >= 500) return Math.min(2, Math.max(0.5, Math.min(w / 1280, h / 720)));
+        return 1;
+    }
+    function applyUiScale() {
+        const onBoard = $('carouselScreen') && $('carouselScreen').classList.contains('active');
+        const base = baseScale();
+        const mult = device.uiScale === 'auto' ? 1 : (parseFloat(device.uiScale) || 1);
+        const sc = Math.max(0.4, Math.min(2.5, onBoard ? base : base * mult));
+        document.documentElement.style.setProperty('--ui-scale', sc.toFixed(3));
+        const ro = $('uiScaleReadout');
+        if (ro) ro.innerHTML = `מסך: <bdi dir="ltr">${window.innerWidth}×${window.innerHeight}</bdi> • קנה מידה פעיל בניהול: <bdi dir="ltr">${Math.round(base * mult * 100)}%</bdi>`;
+        document.querySelectorAll('#uiScaleChips .chip').forEach(c => c.classList.toggle('active', c.dataset.scale === String(device.uiScale)));
+        document.querySelectorAll('#remoteModeChips .chip').forEach(c => c.classList.toggle('active', c.dataset.mode === device.remote));
+    }
+    function setUiScale(v) { device.uiScale = v; saveDevice(); applyUiScale(); }
+    function setRemoteMode(v) { device.remote = v; saveDevice(); applyRemoteMode(); applyUiScale(); }
+    function resetDeviceSettings() { device.uiScale = 'auto'; device.remote = 'auto'; saveDevice(); applyRemoteMode(); applyUiScale(); showToast('הגדרות התצוגה אופסו'); }
+    window.addEventListener('resize', applyUiScale);
+    window.addEventListener('orientationchange', () => setTimeout(applyUiScale, 150));
+
+    function detectTv() {
+        const r = nativeCall('isTv');
+        if (r === true || r === 'true') return true;
+        return /Android.*(TV|AFT|BRAVIA|SMART-TV|AndroidTV|GoogleTV)|Tizen|Web0S|CrKey/i.test(navigator.userAgent);
+    }
+    function applyRemoteMode() {
+        const on = device.remote === 'on' || (device.remote === 'auto' && detectTv());
+        document.body.classList.toggle('remote-mode', on);
+    }
+    function isRemoteMode() { return document.body.classList.contains('remote-mode'); }
+
+    function showToast(msg, ok) { showAndroidToast(msg, ok !== false); }
+
     let currentSynagogueKey = null;
+    let adminUnlocked = false;
+    let adminDirty = false;
     let currentModalTargetList = null;
     let editTargetListKey = null;
     let editTargetIndex = null;
@@ -2282,16 +2565,6 @@
 
     let calendarCurrentDate = new Date();
     const hebrewDateFormatter = new Intl.DateTimeFormat('he-u-ca-hebrew', { day: 'numeric', month: 'long' });
-
-    document.addEventListener('keydown', function(event) {
-        const carouselScreen = document.getElementById('carouselScreen');
-        if (carouselScreen && carouselScreen.classList.contains('active')) {
-            if (event.key === 'Escape' || event.key === 'Backspace') {
-                event.preventDefault();
-                goHome();
-            }
-        }
-    });
 
     function showAndroidToast(message, isOnline) {
         const toast = document.getElementById('androidToast');
@@ -2685,7 +2958,8 @@
     }
     function applySidebarState() {
         const pref = sidebarPref();
-        const narrow = (pref !== null) ? pref : window.innerWidth < 1000;
+        const sc = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ui-scale')) || 1;
+        const narrow = (pref !== null) ? pref : (window.innerWidth / sc) < 1000;
         document.body.classList.toggle('narrow_menu', narrow);
     }
     function toggleAdminSidebar() {
@@ -2711,32 +2985,56 @@
     window.addEventListener('resize', () => { if (sidebarPref() === null) applySidebarState(); if (window.innerWidth >= 700) closeAdminMenu(); });
 
     window.onload = function() {
+        applyRemoteMode();
+        applyUiScale();
+        startupFlow();
+        nativeCall('setShowInRecents', device.showInRecents !== false);
         applySidebarState();
-        initNetworkChecker();
+        setTimeout(initNetworkChecker, 3000);
         initLiveClockAndHebcal();
     };
 
+    function enterAccount(key) {
+        currentSynagogueKey = key;
+        ensureDefaults(dbSynagogues[key]);
+        applyTheme(dbSynagogues[key].theme || 'classic');
+        loadDataToUI();
+        showScreen('mainMenuScreen');
+    }
+
     function handleLogin() {
-        const emailInput = document.getElementById('loginEmail').value.trim();
-        const passwordInput = document.getElementById('loginPassword').value.trim();
-        const errorMsg = document.getElementById('loginErrorMsg');
+        const emailInput = $('loginEmail').value.trim();
+        const passwordInput = $('loginPassword').value.trim();
+        const errorMsg = $('loginErrorMsg');
 
         if (dbSynagogues[emailInput] && dbSynagogues[emailInput].password === passwordInput) {
             errorMsg.style.display = 'none';
-            currentSynagogueKey = emailInput;
-            const shul = dbSynagogues[emailInput];
-            applyTheme(shul.theme || 'classic');
-            loadDataToUI();
-            showScreen('mainMenuScreen');
+            device.lastUser = device.stayLogged ? emailInput : null;
+            saveDevice();
+            enterAccount(emailInput);
         } else {
             errorMsg.style.display = 'block';
         }
+    }
+
+    function startupFlow() {
+        const splash = $('splashScreen');
+        setTimeout(() => {
+            if (device.stayLogged && device.lastUser && dbSynagogues[device.lastUser]) {
+                enterAccount(device.lastUser);
+                if (device.autoStart || nativeCall('launchedFromBoot') === true) startCarousel();
+            }
+            splash.classList.add('hide');
+            setTimeout(() => { splash.style.display = 'none'; if (window.TVNav) TVNav.refocus(); }, 700);
+        }, 2200);
     }
 
     function confirmLogout() {
         openConfirmModal("התנתקות מהמערכת", "האם ברצונך להתנתק מהמערכת?", () => {
             closeConfirmModal();
             currentSynagogueKey = null;
+            adminUnlocked = false;
+            device.lastUser = null; saveDevice();
             showScreen('loginScreen');
         });
     }
@@ -2791,6 +3089,7 @@
             yahrtzeits: [],
             lastAssignedAliya: 0
         };
+        ensureDefaults(dbSynagogues[email]);
 
         document.getElementById('loginEmail').value = email;
         document.getElementById('loginPassword').value = pass;
@@ -2810,7 +3109,7 @@
         const shul = dbSynagogues[currentSynagogueKey];
         
         document.getElementById('welcomeTitle').innerText = shul.name;
-        for(let i=1; i<=4; i++) { 
+        for(let i=1; i<=5; i++) { 
             const footerElem = document.getElementById(`lblSynagogueFooter${i}`);
             if(footerElem) footerElem.innerText = shul.name; 
         }
@@ -2868,6 +3167,9 @@
         renderYahrtzeitPreviewTable();
         renderSlidesManagementTable();
         populateAllDropdowns();
+        loadSettingsExtras();
+        renderDonorsTable();
+        adminDirty = false;
     }
 
     function setTheme(themeName) {
@@ -2958,13 +3260,15 @@
     function renderSlidesManagementTable() {
         const shul = dbSynagogues[currentSynagogueKey];
         const tbody = document.getElementById('slidesManagementTableBody');
+        const prevFk = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.fk : null;
         tbody.innerHTML = '';
 
         const slideNamesMap = {
             torah: { name: "שבת קודש וקריאת התורה", role: "שקופית מרכזית לשבת" },
             rosh: { name: "הכרזת ראש חודש", role: "מוצגת אוטומטית מיום שלישי ועד מוצאי שבת מברכין" },
             yahrtzeit: { name: "יארצייט ואזכרות השבוע", role: "מוצגת אוטומטית רק אם יש אזכרות השבוע לפי הפרשה" },
-            events: { name: "אירועים מיוחדים השבוע", role: "מודעות ושיעורי תורה" }
+            events: { name: "אירועים מיוחדים השבוע", role: "מודעות ושיעורי תורה" },
+            donors: { name: "נדיבי עם – רשימת השותפים והתורמים", role: "טבלת תורמים (נערכת ב\"ניהול רשימות\")" }
         };
 
         let allSlidesRows = [];
@@ -2978,6 +3282,9 @@
             if (key === 'rosh' && shul.isAutoRosh && !(computeRoshChodesh() || {}).active) {
                 isWaiting = true;
                 waitingHint = ` <span style="font-size:11px; color:#D97706; font-weight:normal;">(ממתין לתנאי אוטומטי)</span>`;
+            } else if (key === 'donors' && !(shul.donors || []).length) {
+                isWaiting = true;
+                waitingHint = ` <span style="font-size:11px; color:#D97706; font-weight:normal;">(אין תורמים ברשימה)</span>`;
             } else if (key === 'yahrtzeit' && shul.isAutoYahrtzeit) {
                 let hasYahrtzeitThisWeek = shul.yahrtzeits.some(y => y.shabbat.includes(shul.parasha));
                 if (!hasYahrtzeitThisWeek) {
@@ -3017,13 +3324,13 @@
             let tr = document.createElement('tr');
             if (row.type === 'system') {
                 tr.innerHTML = `
-                    <td><input type="number" min="1" max="20" value="${row.order}" onchange="updateSlideOrder('${row.key}', this.value)" style="width: 60px; text-align: center;"></td>
+                    <td><input type="number" data-fk="o:${row.key}" min="1" max="20" value="${row.order}" onchange="updateSlideOrder('${row.key}', this.value)" style="width: 60px; text-align: center;"></td>
                     <td><b>${row.name}</b></td>
                     <td><span style="color:var(--text-secondary); font-size:12px;">${row.role}</span></td>
-                    <td><input type="number" min="1" max="60" value="${row.duration}" onchange="updateSlideDuration('${row.key}', this.value)" style="width: 70px; text-align: center;"> שנ'</td>
+                    <td><input type="number" data-fk="d:${row.key}" min="1" max="60" value="${row.duration}" onchange="updateSlideDuration('${row.key}', this.value)" style="width: 70px; text-align: center;"> שנ'</td>
                     <td>
                         <label style="display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;">
-                            <input type="checkbox" ${row.active ? 'checked' : ''} onchange="toggleSlideActive('${row.key}', this.checked)" style="width:18px; height:18px; cursor:pointer;">
+                            <input type="checkbox" data-fk="a:${row.key}" ${row.active ? 'checked' : ''} onchange="toggleSlideActive('${row.key}', this.checked)" style="width:18px; height:18px; cursor:pointer;">
                             <span style="font-weight:bold; color:${row.active ? '#059669' : '#EF4444'};">${row.active ? 'מוצג בקרוסלה' : 'מוסתר'}</span>
                         </label>
                     </td>
@@ -3031,13 +3338,13 @@
             } else {
                 let idx = row.customIndex;
                 tr.innerHTML = `
-                    <td><input type="number" min="1" max="20" value="${row.order}" onchange="updateCustomSlideOrder(${idx}, this.value)" style="width: 60px; text-align: center;"></td>
+                    <td><input type="number" data-fk="o:c${idx}" min="1" max="20" value="${row.order}" onchange="updateCustomSlideOrder(${idx}, this.value)" style="width: 60px; text-align: center;"></td>
                     <td><b>${row.name}</b></td>
                     <td><span style="color:var(--text-secondary); font-size:12px;">${row.role}</span></td>
-                    <td><input type="number" min="1" max="60" value="${row.duration}" onchange="updateCustomSlideDuration(${idx}, this.value)" style="width: 70px; text-align: center;"> שנ'</td>
+                    <td><input type="number" data-fk="d:c${idx}" min="1" max="60" value="${row.duration}" onchange="updateCustomSlideDuration(${idx}, this.value)" style="width: 70px; text-align: center;"> שנ'</td>
                     <td>
                         <label style="display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;">
-                            <input type="checkbox" ${row.active ? 'checked' : ''} onchange="toggleCustomSlideActive(${idx}, this.checked)" style="width:18px; height:18px; cursor:pointer;">
+                            <input type="checkbox" data-fk="a:c${idx}" ${row.active ? 'checked' : ''} onchange="toggleCustomSlideActive(${idx}, this.checked)" style="width:18px; height:18px; cursor:pointer;">
                             <span style="font-weight:bold; color:${row.active ? '#059669' : '#EF4444'};">${row.active ? 'מוצג בקרוסלה' : 'מוסתר'}</span>
                         </label>
                     </td>
@@ -3045,6 +3352,7 @@
             }
             tbody.appendChild(tr);
         });
+        if (prevFk) { const again = tbody.querySelector('[data-fk="' + prevFk + '"]'); if (again) again.focus(); }
     }
 
     function toggleSlideActive(slideKey, isChecked) {
@@ -3567,7 +3875,15 @@
         btnElement.classList.add('active');
     }
 
-    function showScreen(screenId) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(screenId).classList.add('active'); }
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        closeAdminMenu(); closeAllDropdowns();
+        const c = $('carouselControls'); if (c) c.classList.remove('show');
+        applyUiScale();
+        if (screenId === 'carouselScreen') pokeControls();
+        if (window.TVNav) window.TVNav.refocus();
+    }
     
     function switchTab(tabId, btnElement) {
         closeAdminMenu();
@@ -3597,7 +3913,7 @@
         
         if (activeCarouselSlides.length === 0) {
             alert('אין שקופיות פעילות להצגה! אנא הפעל לפחות שקופית אחת בלשונית ניהול שקופיות.');
-            openAdmin();
+            requestAdmin();
             return;
         }
 
@@ -3697,6 +4013,7 @@
         }
 
         if (shul.slidesConfig.events.active) unsortedSlides.push({ id: 'dynSlide_events', key: 'events', order: shul.slidesConfig.events.order || 4 });
+        if (shul.slidesConfig.donors && shul.slidesConfig.donors.active && shul.donors.length > 0) unsortedSlides.push({ id: 'dynSlide_donors', key: 'donors', order: shul.slidesConfig.donors.order || 5 });
 
         shul.customSlides.forEach((cs, idx) => {
             if(cs.active) {
@@ -3819,6 +4136,7 @@
             let activeItem = activeCarouselSlides[currentCarouselIndex];
             let targetElem = document.getElementById(activeItem.id);
             if(targetElem) targetElem.style.display = 'flex';
+            if (activeItem.key === 'donors') renderDonorsSlide();
         }
         renderSlideDots();
     }
@@ -3835,11 +4153,272 @@
             goHome();
         });
     }
+    document.addEventListener('input', e => { if (e.target.closest && e.target.closest('#adminScreen')) adminDirty = true; });
+    document.addEventListener('change', e => { if (e.target.closest && e.target.closest('#adminScreen')) adminDirty = true; });
 
     function goHome() { 
         if (carouselTimer) clearTimeout(carouselTimer); 
+        adminUnlocked = false;
         showScreen('mainMenuScreen'); 
     }
+
+    // ===== כניסה מוגנת לניהול =====
+    let pinMode = 'verify';
+    function requestAdmin() {
+        const shul = dbSynagogues[currentSynagogueKey];
+        if (!shul) return;
+        if (adminUnlocked) return openAdmin();
+        pinMode = shul.adminPin ? 'verify' : 'create';
+        $('pinError').style.display = 'none';
+        $('pinInput1').value = ''; $('pinInput2').value = '';
+        if (pinMode === 'verify') {
+            $('pinTitle').innerText = '🔒 כניסה לניהול';
+            $('pinMsg').innerText = 'הקלידו את סיסמת הניהול (או את סיסמת החשבון).';
+            $('pinLabel1').innerText = 'סיסמת ניהול';
+            $('pinRow2').style.display = 'none';
+            $('pinSkipBtn').style.display = 'none';
+        } else {
+            $('pinTitle').innerText = '🔒 הגדרת סיסמת ניהול';
+            $('pinMsg').innerText = 'עדיין לא הוגדרה סיסמת ניהול. מומלץ להגדיר כעת כדי שאף אחד לא ישנה את הנתונים (לפחות 4 תווים).';
+            $('pinLabel1').innerText = 'סיסמת ניהול חדשה';
+            $('pinRow2').style.display = '';
+            $('pinSkipBtn').style.display = '';
+        }
+        $('pinModal').style.display = 'flex';
+    }
+    function closePinModal() { $('pinModal').style.display = 'none'; }
+    function skipPin() { closePinModal(); adminUnlocked = true; openAdmin(); }
+    function submitPin() {
+        const shul = dbSynagogues[currentSynagogueKey];
+        const v1 = $('pinInput1').value.trim();
+        const err = $('pinError');
+        if (pinMode === 'verify') {
+            if (v1 && (v1 === shul.adminPin || v1 === shul.password)) { closePinModal(); adminUnlocked = true; openAdmin(); }
+            else { err.innerText = 'הסיסמה שגויה'; err.style.display = 'block'; $('pinInput1').value = ''; $('pinInput1').focus(); }
+        } else {
+            const v2 = $('pinInput2').value.trim();
+            if (v1.length < 4) { err.innerText = 'הסיסמה חייבת להכיל לפחות 4 תווים'; err.style.display = 'block'; return; }
+            if (v1 !== v2) { err.innerText = 'הסיסמאות אינן תואמות'; err.style.display = 'block'; return; }
+            shul.adminPin = v1; persistDB();
+            closePinModal(); adminUnlocked = true; showToast('סיסמת הניהול נשמרה'); openAdmin();
+        }
+    }
+
+    // ===== הגדרות: אבטחה, חשבון ומכשיר =====
+    function loadSettingsExtras() {
+        const shul = dbSynagogues[currentSynagogueKey];
+        $('inDonorsBlessing').value = shul.donorsBlessing;
+        $('inAccUser').value = currentSynagogueKey;
+        $('inAccPass').value = ''; $('inAdminPin').value = ''; $('inAdminPin2').value = '';
+        const ps = $('pinStatus');
+        ps.textContent = shul.adminPin ? 'סיסמת ניהול מוגדרת ✓' : '⚠ לא הוגדרה סיסמת ניהול';
+        ps.classList.toggle('warn', !shul.adminPin);
+        $('optAutoStart').checked = !!device.autoStart;
+        $('optStayLogged').checked = !!device.stayLogged;
+        $('optShowInRecents').checked = device.showInRecents !== false;
+        refreshAutoStartNote();
+    }
+    function refreshAutoStartNote() {
+        const n = $('autoStartNote');
+        if (!isNativeApp()) { n.innerHTML = 'ההפעלה האוטומטית זמינה רק באפליקציית האנדרואיד.'; return; }
+        const can = nativeCall('canDrawOverlays');
+        if (device.autoStart && can === false) {
+            n.innerHTML = '⚠ באנדרואיד 10 ומעלה נדרשת הרשאת "הצגה מעל אפליקציות אחרות" כדי שהאפליקציה תיפתח מעצמה. <a href="#" onclick="requestOverlayPermission(); return false;" style="color:var(--accent-color); font-weight:bold;">לחצו כאן לאישור ההרשאה</a>';
+        } else n.innerHTML = '';
+    }
+    function requestOverlayPermission() { nativeCall('openOverlaySettings'); }
+    function onAutoStartToggle(v) {
+        device.autoStart = v;
+        if (v) { device.stayLogged = true; $('optStayLogged').checked = true; device.lastUser = currentSynagogueKey; }
+        saveDevice(); nativeCall('setAutoStart', v);
+        refreshAutoStartNote();
+        if (v && isNativeApp() && nativeCall('canDrawOverlays') === false) {
+            openConfirmModal('נדרשת הרשאה', 'כדי שהאפליקציה תיפתח מעצמה בהדלקת הטלוויזיה יש לאשר "הצגה מעל אפליקציות אחרות". לפתוח את מסך ההרשאות?', () => { closeConfirmModal(); requestOverlayPermission(); });
+        }
+    }
+    function onStayLoggedToggle(v) {
+        device.stayLogged = v; device.lastUser = v ? currentSynagogueKey : null; saveDevice();
+        if (!v && device.autoStart) { device.autoStart = false; $('optAutoStart').checked = false; nativeCall('setAutoStart', false); showToast('הפעלה אוטומטית כובתה (דורשת חשבון מחובר)', false); }
+    }
+    function onRecentsToggle(v) { device.showInRecents = v; saveDevice(); nativeCall('setShowInRecents', v); }
+
+    function applySecurityFromForm() {
+        const shul = dbSynagogues[currentSynagogueKey];
+        const p1 = $('inAdminPin').value.trim(), p2 = $('inAdminPin2').value.trim();
+        const acc = $('inAccUser').value.trim(), ap = $('inAccPass').value.trim();
+        if (p1 || p2) {
+            if (p1 !== p2) return 'סיסמאות הניהול אינן תואמות';
+            if (p1.length < 4) return 'סיסמת ניהול חייבת להכיל לפחות 4 תווים';
+        }
+        if (ap && ap.length < 4) return 'סיסמת החשבון חייבת להכיל לפחות 4 תווים';
+        if (!acc) return 'שם המשתמש לא יכול להיות ריק';
+        if (acc !== currentSynagogueKey && dbSynagogues[acc]) return 'שם המשתמש כבר קיים במערכת';
+        if (p1) shul.adminPin = p1;
+        if (ap) shul.password = ap;
+        if (acc !== currentSynagogueKey) {
+            dbSynagogues[acc] = shul; delete dbSynagogues[currentSynagogueKey];
+            currentSynagogueKey = acc;
+            if (device.lastUser) { device.lastUser = acc; saveDevice(); }
+        }
+        return null;
+    }
+    function trySaveAll() {
+        const err = applySecurityFromForm();
+        if (err) { switchTabManually('tabSettings'); showToast(err, false); return false; }
+        collectFormData();
+        loadDataToUI();
+        persistDB();
+        adminDirty = false;
+        return true;
+    }
+
+    // ===== פקדי קרוסלה: מוסתרים עד פעילות =====
+    let ctlTimer = null;
+    function pokeControls() {
+        const c = $('carouselControls'); if (!c) return;
+        c.classList.add('show');
+        clearTimeout(ctlTimer);
+        ctlTimer = setTimeout(() => {
+            c.classList.remove('show');
+            if (c.contains(document.activeElement)) document.activeElement.blur();
+        }, 4000);
+    }
+    function boardActive() { const c = $('carouselScreen'); return c && c.classList.contains('active'); }
+    ['touchstart', 'mousemove', 'mousedown', 'pointerdown'].forEach(ev =>
+        document.addEventListener(ev, () => { if (boardActive()) pokeControls(); }, { passive: true }));
+
+    // ===================== נדיבי עם =====================
+    function esc(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+    let donorEditIndex = -1;
+    function renderDonorsTable() {
+        const shul = dbSynagogues[currentSynagogueKey];
+        const tb = $('donorsTableBody');
+        if (!shul || !tb) return;
+        tb.innerHTML = '';
+        if (!shul.donors.length) {
+            tb.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-secondary); padding:18px;">אין תורמים ברשימה. לחצו על "＋ הוסף תורם".</td></tr>';
+            return;
+        }
+        shul.donors.forEach((d, i) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><b>${i + 1}</b></td>
+                <td><b style="color:var(--primary-color);">${esc(d.name)}</b></td>
+                <td>${esc(d.merit)}</td>
+                <td>${esc(d.amount)}</td>
+                <td><div class="row-actions">
+                    <button class="row-btn" title="הזז למעלה" onclick="moveDonor(${i}, -1)">▲</button>
+                    <button class="row-btn" title="הזז למטה" onclick="moveDonor(${i}, 1)">▼</button>
+                    <button class="row-btn edit" onclick="openDonorModal(${i})">עריכה</button>
+                    <button class="row-btn del" onclick="confirmRemoveDonor(${i})">מחק</button>
+                </div></td>`;
+            tb.appendChild(tr);
+        });
+    }
+    function openDonorModal(idx) {
+        const shul = dbSynagogues[currentSynagogueKey];
+        donorEditIndex = idx;
+        const d = idx >= 0 ? shul.donors[idx] : { name: '', merit: '', amount: '' };
+        $('donorModalTitle').innerText = idx >= 0 ? '✏️ עריכת תורם' : '🤝 הוספת תורם';
+        $('donorName').value = d.name; $('donorMerit').value = d.merit; $('donorAmount').value = d.amount;
+        $('donorPos').value = idx >= 0 ? idx + 1 : shul.donors.length + 1;
+        $('donorModal').style.display = 'flex';
+    }
+    function closeDonorModal() { $('donorModal').style.display = 'none'; }
+    function submitDonor() {
+        const shul = dbSynagogues[currentSynagogueKey];
+        const name = $('donorName').value.trim();
+        if (!name) { showToast('נא למלא שם תורם', false); $('donorName').focus(); return; }
+        const d = { name, merit: $('donorMerit').value.trim(), amount: $('donorAmount').value.trim() };
+        let pos = parseInt($('donorPos').value) || shul.donors.length + 1;
+        if (donorEditIndex >= 0) shul.donors.splice(donorEditIndex, 1);
+        pos = Math.max(1, Math.min(pos, shul.donors.length + 1));
+        shul.donors.splice(pos - 1, 0, d);
+        closeDonorModal(); renderDonorsTable(); renderSlidesManagementTable(); persistDB();
+    }
+    function moveDonor(i, dir) {
+        const arr = dbSynagogues[currentSynagogueKey].donors, j = i + dir;
+        if (j < 0 || j >= arr.length) return;
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+        renderDonorsTable(); persistDB();
+        // keep focus on the same arrow after re-render (remote friendly)
+        const rows = $('donorsTableBody').querySelectorAll('tr');
+        const btn = rows[j] && rows[j].querySelectorAll('.row-btn')[dir < 0 ? 0 : 1];
+        if (btn) btn.focus();
+    }
+    function confirmRemoveDonor(i) {
+        const d = dbSynagogues[currentSynagogueKey].donors[i];
+        openConfirmModal('מחיקת תורם', `למחוק את "${d.name}" מהרשימה?`, () => {
+            dbSynagogues[currentSynagogueKey].donors.splice(i, 1);
+            closeConfirmModal(); renderDonorsTable(); renderSlidesManagementTable(); persistDB();
+        });
+    }
+    function sortDonors() {
+        dbSynagogues[currentSynagogueKey].donors.sort((a, b) => a.name.localeCompare(b.name, 'he'));
+        renderDonorsTable(); persistDB(); showToast('הרשימה מוינה לפי שם');
+    }
+    function confirmClearDonors() {
+        if (!dbSynagogues[currentSynagogueKey].donors.length) return;
+        openConfirmModal('ניקוי הרשימה', 'למחוק את כל התורמים מהרשימה? לא ניתן לבטל פעולה זו.', () => {
+            dbSynagogues[currentSynagogueKey].donors = [];
+            closeConfirmModal(); renderDonorsTable(); renderSlidesManagementTable(); persistDB();
+        });
+    }
+    function exportDonorsExcel() {
+        const shul = dbSynagogues[currentSynagogueKey];
+        if (!shul.donors.length) return showToast('הרשימה ריקה', false);
+        const rows = shul.donors.map((d, i) => ({ "מיקום": i + 1, "שם התורם": d.name, "הזכות": d.merit, "נדבת הלב": d.amount }));
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "נדיבי עם");
+        if (window.AndroidBridge) {
+            window.AndroidBridge.saveFile('נדיבי עם.xlsx', XLSX.write(wb, { bookType: 'xlsx', type: 'base64' }), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        } else XLSX.writeFile(wb, 'נדיבי עם.xlsx');
+    }
+    function handleDonorsImport(ev) {
+        const f = ev.target.files[0]; if (!f) return;
+        const rd = new FileReader();
+        rd.onload = e => {
+            try {
+                const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+                const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: '' });
+                let start = 0;
+                if (rows[0] && /שם|תורם|מיקום/.test(rows[0].join(' '))) start = 1;
+                const hasPosCol = rows[0] && /מיקום|#/.test(String(rows[0][0]));
+                const out = [];
+                for (let i = start; i < rows.length; i++) {
+                    const r = hasPosCol ? rows[i].slice(1) : rows[i];
+                    if (r[0] && String(r[0]).trim()) out.push({ name: String(r[0]).trim(), merit: String(r[1] || '').trim(), amount: String(r[2] || '').trim() });
+                }
+                if (!out.length) return showToast('לא נמצאו שורות בקובץ', false);
+                dbSynagogues[currentSynagogueKey].donors.push(...out);
+                renderDonorsTable(); renderSlidesManagementTable(); persistDB();
+                showToast(`נוספו ${out.length} תורמים`);
+            } catch (err) { showToast('קריאת הקובץ נכשלה', false); }
+            ev.target.value = '';
+        };
+        rd.readAsArrayBuffer(f);
+    }
+    function renderDonorsSlide() {
+        const shul = dbSynagogues[currentSynagogueKey];
+        const body = $('donorsSlideBody'), tbl = $('donorsSlideTable'), wrap = $('donorsTableWrap');
+        if (!shul || !body) return;
+        $('lblDonorsBlessing').innerText = shul.donorsBlessing || '';
+        body.innerHTML = shul.donors.map(d => `<tr><td>${esc(d.name)}</td><td>${esc(d.merit)}</td><td>${esc(d.amount)}</td></tr>`).join('');
+        const n = shul.donors.length;
+        const fs = n <= 5 ? 24 : n <= 8 ? 20 : n <= 11 ? 17 : 15;
+        tbl.style.setProperty('--donor-fs', fs + 'px');
+        tbl.classList.remove('scrolling');
+        tbl.style.removeProperty('--donor-shift');
+        requestAnimationFrame(() => {
+            const over = tbl.offsetHeight - wrap.clientHeight;
+            if (over > 4) {
+                tbl.style.setProperty('--donor-shift', over + 'px');
+                tbl.style.setProperty('--donor-dur', Math.max(6, over / 18) + 's');
+                tbl.classList.add('scrolling');
+            }
+        });
+    }
+
 
     function collectFormData() {
         const shul = dbSynagogues[currentSynagogueKey];
@@ -3849,7 +4428,7 @@
         document.getElementById('welcomeTitle').innerText = shul.name;
         document.getElementById('adminPanelHeaderTitle').innerText = shul.adminTitleText;
         document.getElementById('adminMenuBtnText').innerText = shul.adminTitleText;
-        for(let i=1; i<=4; i++) { 
+        for(let i=1; i<=5; i++) { 
             const fElem = document.getElementById(`lblSynagogueFooter${i}`);
             if(fElem) fElem.innerText = shul.name; 
         }
@@ -3879,6 +4458,7 @@
         shul.prayerTimes.minchaShabbat = document.getElementById('inTimeMinchaShabbat').value;
         shul.prayerTimes.arvitMotzei = document.getElementById('inTimeArvitMotzei').value;
 
+        shul.donorsBlessing = $('inDonorsBlessing').value.trim() || DEFAULT_DONORS_BLESSING;
         shul.eventTitle = document.getElementById('inEventTitle').value;
         shul.eventDesc = document.getElementById('inEventDesc').innerHTML;
 
@@ -3886,16 +4466,19 @@
     }
 
     function saveChangesOnly() {
-        collectFormData();
-        loadDataToUI();
-        alert("השינויים נשמרו בהצלחה במערכת!");
+        if (!trySaveAll()) return;
+        showToast("✔ השינויים נשמרו בהצלחה");
     }
 
     function saveChangesAndShow() {
-        collectFormData();
-        loadDataToUI();
-        alert("השינויים נשמרו בהצלחה ועודכנו בלוח!");
+        if (!trySaveAll()) return;
+        showToast("✔ נשמר ועודכן בלוח");
         startCarousel();
+    }
+
+    function leaveAdmin() {
+        if (adminDirty) { confirmCancel(); return; }
+        goHome();
     }
 
     function openConfirmModal(title, message, onConfirmCallback) {
@@ -3906,6 +4489,255 @@
         document.getElementById('confirmModal').style.display = 'flex';
     }
     function closeConfirmModal() { document.getElementById('confirmModal').style.display = 'none'; }
+</script>
+
+<script>
+/* ===================== v3: שכבת מקלדת / שלט / חזור ===================== */
+(function () {
+    const $ = id => document.getElementById(id);
+    const FOCUSABLE = 'a[href],button,input,select,textarea,[tabindex],[contenteditable="true"]';
+    const MODAL_CLOSERS = {
+        registerModal: 'closeRegisterModal', forgotModal: 'closeForgotModal', customSlideModal: 'closeAddCustomSlideModal',
+        memberModal: 'closeAddMemberModal', editMemberModal: 'closeEditMemberModal', editYahrtzeitModal: 'closeEditYahrtzeitModal',
+        exportModal: 'closeExportModal', yahrtzeitModal: 'closeAddYahrtzeitModal', confirmModal: 'closeConfirmModal',
+        pinModal: 'closePinModal', donorModal: 'closeDonorModal'
+    };
+    const TEXT_TYPES = ['text', 'search', 'email', 'url', 'tel', 'password', ''];
+    const STEP_TYPES = ['number', 'time', 'date', 'datetime-local', 'month', 'week'];
+
+    function openModals() { return [...document.querySelectorAll('.modal-overlay')].filter(m => getComputedStyle(m).display !== 'none'); }
+    function topModal() { const o = openModals(); return o.length ? o[o.length - 1] : null; }
+    function closeModal(m) {
+        const fn = window[MODAL_CLOSERS[m.id]];
+        if (typeof fn === 'function') fn(); else m.style.display = 'none';
+    }
+    function isVisible(el) {
+        if (el.disabled || el.hidden || el.type === 'hidden' || el.type === 'file') return false;
+        if (el.closest('[inert]')) return false;
+        const r = el.getBoundingClientRect();
+        if (r.width < 2 || r.height < 2) return false;
+        const cs = getComputedStyle(el);
+        return cs.visibility !== 'hidden' && cs.display !== 'none';
+    }
+    function isTextInput(el) { return el && el.tagName === 'INPUT' && TEXT_TYPES.includes((el.getAttribute('type') || 'text').toLowerCase()); }
+    function isStepInput(el) { return el && el.tagName === 'INPUT' && STEP_TYPES.includes((el.getAttribute('type') || '').toLowerCase()); }
+    function isMultiline(el) { return el && (el.tagName === 'TEXTAREA' || el.isContentEditable); }
+    function isTextEntry(el) { return isTextInput(el) || isStepInput(el) || isMultiline(el); }
+
+    /* ---------- פוקוסביליות ל-div / קישורים עם onclick ---------- */
+    function makeFocusable() {
+        document.querySelectorAll('[onclick]:not(button):not(input):not(select):not(textarea):not([tabindex]), label.dropdown-item:not([tabindex])')
+            .forEach(el => el.setAttribute('tabindex', '0'));
+    }
+    let mkT = null;
+    new MutationObserver(() => { clearTimeout(mkT); mkT = setTimeout(makeFocusable, 120); })
+        .observe(document.body, { childList: true, subtree: true });
+    makeFocusable();
+
+    /* ---------- ניהול חלונות קופצים: מלכודת פוקוס, אוטופוקוס, שחזור ---------- */
+    const wasOpen = new Map(); let returnFocus = null;
+    function focusFirstIn(modal) {
+        let el = modal.querySelector('[data-autofocus]');
+        if (!el || !isVisible(el)) el = [...modal.querySelectorAll('input, select, textarea')].find(isVisible);
+        if (!el) el = [...modal.querySelectorAll('button')].find(isVisible);
+        if (el) { el.focus(); if (el.select && isTextInput(el)) try { el.select(); } catch (e) {} }
+    }
+    function syncModals() {
+        const open = openModals(), app = document.querySelector('.app-container');
+        const top = open[open.length - 1];
+        if (app) app.inert = open.length > 0;
+        document.querySelectorAll('.modal-overlay').forEach(m => { m.inert = !!top && m !== top; });
+        document.querySelectorAll('.modal-overlay').forEach(m => {
+            const was = wasOpen.get(m) || false, now = open.includes(m);
+            if (now && !was) {
+                if (!returnFocus || !open.length || open.length === 1) returnFocus = returnFocus || document.activeElement;
+                setTimeout(() => { if (m === topModal()) focusFirstIn(m); }, 30);
+            }
+            wasOpen.set(m, now);
+        });
+        if (!open.length && returnFocus) {
+            const r = returnFocus; returnFocus = null;
+            setTimeout(() => { if (document.body.contains(r) && isVisible(r)) r.focus(); else refocus(); }, 30);
+        }
+    }
+    const mo = new MutationObserver(syncModals);
+    document.querySelectorAll('.modal-overlay').forEach(m => mo.observe(m, { attributes: true, attributeFilter: ['style', 'class'] }));
+    document.addEventListener('focusin', e => {
+        const t = topModal();
+        if (t && !t.contains(e.target)) focusFirstIn(t);
+    });
+
+    /* ---------- מצב עריכת מספרים ---------- */
+    let editEl = null;
+    function startEditing(el) { exitEditing(); editEl = el; el.classList.add('num-editing'); showToast('עריכה: ↑↓ משנים ערך • OK/חזור לסיום'); }
+    function exitEditing() { if (!editEl) return false; editEl.classList.remove('num-editing'); editEl = null; return true; }
+    document.addEventListener('focusout', e => { if (e.target === editEl) exitEditing(); });
+
+    /* ---------- ניווט מרחבי ---------- */
+    function candidates() {
+        let root = topModal() || document;
+        if (boardActive()) root = $('carouselControls');
+        return [...root.querySelectorAll(FOCUSABLE)].filter(el => el.tabIndex !== -1 && isVisible(el));
+    }
+    function center(r) { return { x: (r.left + r.right) / 2, y: (r.top + r.bottom) / 2 }; }
+    function moveFocus(dir) {
+        const list = candidates(); if (!list.length) return false;
+        let cur = document.activeElement;
+        if (!cur || cur === document.body || !list.includes(cur)) {
+            const f = list[0]; f.focus(); f.scrollIntoView({ block: 'nearest' }); return true;
+        }
+        const cr = cur.getBoundingClientRect(), cc = center(cr);
+        let best = null, bestScore = Infinity;
+        for (let pass = 0; pass < 2 && !best; pass++) {
+            for (const el of list) {
+                if (el === cur || cur.contains(el) || el.contains(cur)) continue;
+                const r = el.getBoundingClientRect(), c = center(r);
+                const vOver = r.left < cr.right && r.right > cr.left, hOver = r.top < cr.bottom && r.bottom > cr.top;
+                let gap, sec;
+                if (dir === 'down') { gap = r.top - cr.bottom; sec = vOver ? 0 : Math.abs(c.x - cc.x); }
+                else if (dir === 'up') { gap = cr.top - r.bottom; sec = vOver ? 0 : Math.abs(c.x - cc.x); }
+                else if (dir === 'left') { gap = cr.left - r.right; sec = hOver ? 0 : Math.abs(c.y - cc.y); }
+                else { gap = r.left - cr.right; sec = hOver ? 0 : Math.abs(c.y - cc.y); }
+                if (pass === 0) { if (gap < -4) continue; gap = Math.max(0, gap); }
+                else {                                   // גיבוי: לפי מרכזים
+                    const d = (dir === 'down') ? c.y - cc.y : (dir === 'up') ? cc.y - c.y : (dir === 'left') ? cc.x - c.x : c.x - cc.x;
+                    if (d <= 2) continue; gap = d;
+                }
+                const score = gap + sec * 2.5;
+                if (score < bestScore) { bestScore = score; best = el; }
+            }
+        }
+        if (best) {
+            best.focus(); best.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+            if (isTextInput(best)) try { best.select(); } catch (e) {}
+            return true;
+        }
+        if (dir === 'up' || dir === 'down') {          // אין יעד: גלילה של האזור הנוכחי
+            let sc = cur.parentElement;
+            while (sc && sc !== document.body) {
+                const cs = getComputedStyle(sc);
+                if (/(auto|scroll)/.test(cs.overflowY) && sc.scrollHeight > sc.clientHeight + 2) { sc.scrollBy({ top: dir === 'down' ? 120 : -120 }); return true; }
+                sc = sc.parentElement;
+            }
+        }
+        return false;
+    }
+    function refocus() {
+        if (!isRemoteMode()) return;
+        setTimeout(() => {
+            if (topModal()) return;
+            const scr = document.querySelector('.screen.active'); if (!scr || scr.id === 'carouselScreen') return;
+            let t = null;
+            if (scr.id === 'loginScreen') t = $('loginEmail');
+            else if (scr.id === 'adminScreen') t = scr.querySelector('.tab-btn.active');
+            else t = [...scr.querySelectorAll('button')].find(isVisible);
+            if (t) t.focus();
+        }, 60);
+    }
+    window.TVNav = { refocus };
+
+    /* ---------- קצה כתיבה: האם הסמן בשורה הראשונה/אחרונה ---------- */
+    function caretEdge(el, which) {                   // which: 'start' | 'end'
+        if (el.tagName === 'TEXTAREA') {
+            if (el.selectionStart !== el.selectionEnd) return false;
+            return which === 'start' ? !el.value.slice(0, el.selectionStart).includes('\n') : !el.value.slice(el.selectionEnd).includes('\n');
+        }
+        const sel = getSelection(); if (!sel.rangeCount || !sel.isCollapsed) return false;
+        const r = document.createRange(); r.selectNodeContents(el);
+        if (which === 'start') r.setEnd(sel.anchorNode, sel.anchorOffset); else r.setStart(sel.anchorNode, sel.anchorOffset);
+        return r.toString().length === 0;
+    }
+    function inputEdge(el, dir) {                     // חץ שמאלה/ימינה בשדה טקסט: האם נגמר הטקסט?
+        if (!el.value) return true;
+        if (el.selectionStart !== el.selectionEnd) return false;
+        let type = el.type; if (type === 'email' || type === 'number') return true;
+        const rtl = getComputedStyle(el).direction === 'rtl';
+        const atStart = el.selectionStart === 0, atEnd = el.selectionStart === el.value.length;
+        if (dir === 'left') return rtl ? atEnd : atStart;
+        return rtl ? atStart : atEnd;
+    }
+
+    /* ---------- Enter = שדה הבא ---------- */
+    function enterNext(e, el) {
+        const container = el.closest('.modal-box, .login-box') || el.closest('.tab-content') || el.closest('.screen') || document.body;
+        const fields = [...container.querySelectorAll('input:not([type=hidden]):not([type=file]):not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]), select, textarea, [contenteditable="true"]')]
+            .filter(isVisible);
+        const i = fields.indexOf(el);
+        e.preventDefault();
+        if (i >= 0 && i < fields.length - 1) {
+            const n = fields[i + 1]; n.focus(); n.scrollIntoView({ block: 'nearest' });
+            if (isTextInput(n)) try { n.select(); } catch (x) {}
+            return;
+        }
+        // אחרון: שליחה (התחברות/קוד) או מעבר לכפתור האישור
+        const ov = el.closest('.modal-overlay');
+        const submitId = ov ? ov.dataset.enterSubmit : (el.closest('.login-box') ? 'loginBtn' : null);
+        if (submitId && $(submitId)) { $(submitId).click(); return; }
+        let btn = null;
+        if (ov) btn = [...ov.querySelectorAll('.modal-actions .btn, .modal-box > .btn, button')].find(isVisible);
+        else if (el.closest('#adminScreen')) btn = document.querySelector('.footer-actions .btn-modern-primary');
+        if (btn) btn.focus();
+    }
+
+    /* ---------- חזור ---------- */
+    let lastBack = 0;
+    window.handleBackKey = function () {
+        if (exitEditing()) return true;
+        const m = topModal(); if (m) { closeModal(m); return true; }
+        if (document.querySelector('.dropdown-container.open')) { closeAllDropdowns(); return true; }
+        if (document.body.classList.contains('menu_open')) { closeAdminMenu(); return true; }
+        const ae = document.activeElement;
+        if (isRemoteMode() && ae && isMultiline(ae)) { ae.blur(); moveFocus('up'); return true; }
+        const scr = document.querySelector('.screen.active'); if (!scr) return false;
+        if (scr.id === 'carouselScreen') { goHome(); return true; }
+        if (scr.id === 'adminScreen') { leaveAdmin(); return true; }
+        const now = Date.now();
+        if (now - lastBack < 2200) { nativeCall('exitApp'); return true; }
+        lastBack = now; showToast('לחצו שוב על "חזור" ליציאה מהאפליקציה', false);
+        return true;
+    };
+
+    /* ---------- מקלדת ---------- */
+    document.addEventListener('keydown', function (e) {
+        if (e.defaultPrevented) return;
+        const k = e.key, t = e.target;
+        if (k === 'Escape' || k === 'GoBack' || k === 'BrowserBack' || (k === 'Backspace' && !isTextEntry(t))) {
+            if (window.handleBackKey()) { e.preventDefault(); e.stopPropagation(); }
+            return;
+        }
+        if (boardActive()) {                              // לוח: כל מקש מציג את הפקדים
+            const c = $('carouselControls'), shown = c.classList.contains('show');
+            pokeControls();
+            if (!shown && (k === 'Enter' || k === ' ' || k.startsWith('Arrow'))) {
+                e.preventDefault(); const b = $('pausePlayBtn'); if (b) b.focus(); return;
+            }
+        }
+        const dirMap = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
+        if (k === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+            if (isMultiline(t) || t.tagName === 'SELECT' || t.tagName === 'BUTTON') return;
+            if (t.tagName === 'INPUT' && (t.type === 'checkbox' || t.type === 'radio')) { e.preventDefault(); t.click(); return; }
+            if (isStepInput(t) && isRemoteMode() && editEl !== t) { e.preventDefault(); startEditing(t); return; }
+            if (isStepInput(t) || isTextInput(t)) { exitEditing(); enterNext(e, t); return; }
+            if (t.hasAttribute && t.hasAttribute('tabindex') && t.tagName !== 'BODY') { e.preventDefault(); t.click(); return; }
+            return;
+        }
+        if (k === ' ' && t.hasAttribute && t.hasAttribute('tabindex') && !isTextEntry(t) && !['BUTTON', 'INPUT', 'SELECT'].includes(t.tagName)) { e.preventDefault(); t.click(); return; }
+        if (!isRemoteMode() || !dirMap[k]) return;
+        const dir = dirMap[k];
+        if (editEl === t && (dir === 'up' || dir === 'down')) return;          // עריכת ערך
+        if (editEl === t) exitEditing();
+        if (isTextInput(t) && (dir === 'left' || dir === 'right') && !inputEdge(t, dir)) return;
+        if (isMultiline(t)) {
+            if (dir === 'left' || dir === 'right') return;
+            if (!caretEdge(t, dir === 'up' ? 'start' : 'end')) return;
+        }
+        if (isStepInput(t) && (dir === 'left' || dir === 'right') && t.type !== 'number' && editEl !== t) { /* זמן/תאריך: ניווט בין שדות */ }
+        e.preventDefault();
+        moveFocus(dir);
+    }, true);
+
+    syncModals();
+})();
 </script>
 
 </body>
