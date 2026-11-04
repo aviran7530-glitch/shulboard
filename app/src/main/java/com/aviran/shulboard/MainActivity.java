@@ -3,7 +3,9 @@ package com.aviran.shulboard;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.UiModeManager;
+import android.content.ComponentName;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.provider.Settings;
 import java.util.List;
@@ -103,7 +105,6 @@ public class MainActivity extends Activity {
             }
         });
 
-        applyRecentsPref(getPrefs().getBoolean(KEY_HIDE_RECENTS, false));
         webView.loadUrl("file:///android_asset/index.html");
     }
 
@@ -196,10 +197,18 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
-        public void setShowInRecents(boolean show) {
-            getPrefs().edit().putBoolean(KEY_HIDE_RECENTS, !show).apply();
-            runOnUiThread(() -> applyRecentsPref(!show));
+        public void setShowLauncherIcon(boolean show) {
+            try {
+                getPackageManager().setComponentEnabledSetting(
+                    new ComponentName(MainActivity.this, "com.aviran.shulboard.LauncherAlias"),
+                    show ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                    PackageManager.DONT_KILL_APP);
+            } catch (Exception ignored) { }
         }
+
+        /** נשמר לתאימות לאחור */
+        @JavascriptInterface
+        public void setShowInRecents(boolean show) { setShowLauncherIcon(show); }
 
         @JavascriptInterface
         public boolean canDrawOverlays() {

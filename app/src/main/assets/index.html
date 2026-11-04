@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>לוח מודעות בית כנסת - מערכת ניהול חכמה ומסונכרנת</title>
     <script src="xlsx.full.min.js"></script>
+    <script src="libs/hebcal.min.js"></script>
+    <script src="libs/tz.js"></script>
+    <script src="libs/cities.js"></script>
+    <script src="libs/pdf.min.js"></script>
+    <link rel="stylesheet" href="v4.css">
     <style>
         :root {
             --primary-color: #1E3A8A;
@@ -535,9 +540,14 @@
             padding: 4px 8px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: bold;
-            height: 30px;
+            min-height: 34px;
+            height: auto;
+            line-height: 1.4;
+            min-width: 100px;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         /* כפתור צבע טקסט עם אייקון A ופס צבע מתחתיו */
@@ -1435,6 +1445,7 @@
     <div id="splashScreen" class="splash">
         <img src="logo.png" alt="" class="splash-logo">
         <div class="splash-title">מערכת גבאי בית כנסת</div>
+        <div class="splash-sub">לוח מודעות חכם, מסונכרן ומותאם לבית הכנסת</div>
         <div class="splash-copy">© כל הזכויות שמורות 2026 לאבירן א. חיים</div>
     </div>
 
@@ -1530,6 +1541,7 @@
                         <div class="time-val" id="lblTimeArvitMotzei">16:30</div>
                     </div>
                 </div>
+                <div class="shab-times-line" id="lblShabTimesLine" style="display:none;"></div>
                 <div class="footer-note">
                     <span id="lblSynagogueFooter1">בית כנסת</span>
                     <span>© כל הזכויות שמורות 2026 לאבירן א. חיים</span>
@@ -1587,6 +1599,24 @@
                     <span>"וְלִמַּדְתֶּם אֹתָם אֶת בְּנֵי כֶלֶם"</span>
                 </div>
             </div>
+
+        <!-- Slide: Calendar -->
+        <div id="dynSlide_calendar" class="carousel-slide" style="display:none; height:100%; flex-direction:column; justify-content:space-between;">
+            <div class="slide-header" id="calSlideTitle">📅 לוח שנה עברי</div>
+            <div class="cal-board" id="calBoard">
+                <div class="cal-board-main">
+                    <div class="cal-board-month" id="calBoardMonth"></div>
+                    <div class="cal-dow" id="calBoardDow"></div>
+                    <div class="cal-grid board" id="calBoardGrid"></div>
+                </div>
+                <div class="cal-board-side" id="calBoardSide"></div>
+            </div>
+            <div class="footer-note">
+                <span id="lblSynagogueFooter6">בית כנסת</span>
+                <span>© כל הזכויות שמורות 2026 לאבירן א. חיים</span>
+                <span>"וְלִמַּדְתֶּם אֹתָם אֶת בְּנֵי כֶלֶם"</span>
+            </div>
+        </div>
 
         <!-- Slide: Donors -->
         <div id="dynSlide_donors" class="carousel-slide" style="display:none; height:100%; flex-direction:column; justify-content:space-between;">
@@ -1845,7 +1875,7 @@
                         <div class="dropdown-container">
                             <button class="btn-modern btn-modern-outline" onclick="toggleDropdown(this, event)">📁 ניהול קבצים <span style="font-size:10px; opacity:.7;">▼</span></button>
                             <div class="dropdown-menu">
-                                <label class="dropdown-item" for="fileImportInput1">📥 ייבוא מ-Excel<input type="file" id="fileImportInput1" accept=".xlsx, .xls" style="display:none;" onchange="handleFileImport(event, 'congregants')"></label>
+                                <label class="dropdown-item" for="fileImportInput1">📥 ייבוא (Excel / PDF)<input type="file" id="fileImportInput1" accept=".xlsx,.xls,.pdf,application/pdf" style="display:none;" onchange="handleFileImport(event, 'congregants')"></label>
                                 <button class="dropdown-item" onclick="closeAllDropdowns(); openExportModal('congregants', 'רשימת מועמדים לעליות')">📤 ייצוא רשימה</button>
                             </div>
                         </div>
@@ -1861,7 +1891,7 @@
                         <div class="dropdown-container">
                             <button class="btn-modern btn-modern-outline" onclick="toggleDropdown(this, event)">📁 ניהול קבצים <span style="font-size:10px; opacity:.7;">▼</span></button>
                             <div class="dropdown-menu">
-                                <label class="dropdown-item" for="fileImportInput2">📥 ייבוא מ-Excel<input type="file" id="fileImportInput2" accept=".xlsx, .xls" style="display:none;" onchange="handleFileImport(event, 'translators')"></label>
+                                <label class="dropdown-item" for="fileImportInput2">📥 ייבוא (Excel / PDF)<input type="file" id="fileImportInput2" accept=".xlsx,.xls,.pdf,application/pdf" style="display:none;" onchange="handleFileImport(event, 'translators')"></label>
                                 <button class="dropdown-item" onclick="closeAllDropdowns(); openExportModal('translators', 'רשימת מתרגמים')">📤 ייצוא רשימה</button>
                             </div>
                         </div>
@@ -1877,7 +1907,7 @@
                         <div class="dropdown-container">
                             <button class="btn-modern btn-modern-outline" onclick="toggleDropdown(this, event)">📁 ניהול קבצים <span style="font-size:10px; opacity:.7;">▼</span></button>
                             <div class="dropdown-menu">
-                                <label class="dropdown-item" for="fileImportInput3">📥 ייבוא מ-Excel<input type="file" id="fileImportInput3" accept=".xlsx, .xls" style="display:none;" onchange="handleFileImport(event, 'seferTorah')"></label>
+                                <label class="dropdown-item" for="fileImportInput3">📥 ייבוא (Excel / PDF)<input type="file" id="fileImportInput3" accept=".xlsx,.xls,.pdf,application/pdf" style="display:none;" onchange="handleFileImport(event, 'seferTorah')"></label>
                                 <button class="dropdown-item" onclick="closeAllDropdowns(); openExportModal('seferTorah', 'רשימת מוציאי ספר תורה')">📤 ייצוא רשימה</button>
                             </div>
                         </div>
@@ -1893,7 +1923,7 @@
                         <div class="dropdown-container">
                             <button class="btn-modern btn-modern-outline" onclick="toggleDropdown(this, event)">📁 ניהול קבצים <span style="font-size:10px; opacity:.7;">▼</span></button>
                             <div class="dropdown-menu">
-                                <label class="dropdown-item" for="fileImportInputYahrtzeit">📥 ייבוא מ-Excel<input type="file" id="fileImportInputYahrtzeit" accept=".xlsx, .xls" style="display:none;" onchange="handleYahrtzeitFileImport(event)"></label>
+                                <label class="dropdown-item" for="fileImportInputYahrtzeit">📥 ייבוא (Excel / PDF)<input type="file" id="fileImportInputYahrtzeit" accept=".xlsx,.xls,.pdf,application/pdf" style="display:none;" onchange="handleYahrtzeitFileImport(event)"></label>
                                 <button class="dropdown-item" onclick="closeAllDropdowns(); openExportModal('yahrtzeits', 'רשימת יארצייט')">📤 ייצוא רשימה</button>
                             </div>
                         </div>
@@ -1909,7 +1939,7 @@
                         <div class="dropdown-container">
                             <button class="btn-modern btn-modern-outline" onclick="toggleDropdown(this, event)">📁 ניהול קבצים <span style="font-size:10px; opacity:.7;">▼</span></button>
                             <div class="dropdown-menu">
-                                <label class="dropdown-item" for="fileImportInput4">📥 ייבוא מ-Excel<input type="file" id="fileImportInput4" accept=".xlsx, .xls" style="display:none;" onchange="handleFileImport(event, 'hazanim')"></label>
+                                <label class="dropdown-item" for="fileImportInput4">📥 ייבוא (Excel / PDF)<input type="file" id="fileImportInput4" accept=".xlsx,.xls,.pdf,application/pdf" style="display:none;" onchange="handleFileImport(event, 'hazanim')"></label>
                                 <button class="dropdown-item" onclick="closeAllDropdowns(); openExportModal('hazanim', 'רשימת חזנים')">📤 ייצוא רשימה</button>
                             </div>
                         </div>
@@ -1926,7 +1956,7 @@
                         <div class="dropdown-container">
                             <button class="btn-modern btn-modern-outline" onclick="toggleDropdown(this, event)">📁 ניהול קבצים <span style="font-size:10px; opacity:.7;">▼</span></button>
                             <div class="dropdown-menu">
-                                <label class="dropdown-item" for="fileImportInputDonors">📥 ייבוא מ-Excel<input type="file" id="fileImportInputDonors" accept=".xlsx, .xls" style="display:none;" onchange="handleDonorsImport(event)"></label>
+                                <label class="dropdown-item" for="fileImportInputDonors">📥 ייבוא (Excel / PDF)<input type="file" id="fileImportInputDonors" accept=".xlsx,.xls,.pdf,application/pdf" style="display:none;" onchange="handleDonorsImport(event)"></label>
                                 <button class="dropdown-item" onclick="closeAllDropdowns(); exportDonorsExcel()">📤 ייצוא ל-Excel</button>
                             </div>
                         </div>
@@ -1938,70 +1968,58 @@
             </div>
 
             <div id="tabCalendar" class="tab-content">
-                <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px;">
-                    <h3 style="color: var(--primary-color); margin-top: 0;">📅 לוח שנה עברי-לועזי מדויק (ה'תשפ"ז)</h3>
-                    
-                    <div class="time-cards-container">
-                        <div class="time-row-cards">
-                            <div class="time-card-item">
-                                <div class="time-card-title">🕒 שעה מדוייקת (זמן אמת)</div>
-                                <div class="time-card-val" id="cardLiveTime">--:--:--</div>
-                            </div>
-                            <div class="time-card-item">
-                                <div class="time-card-title">📅 תאריך לועזי היום</div>
-                                <div class="time-card-val" id="cardGregorianDate">טוען...</div>
-                            </div>
+                <div class="set-card cal-admin">
+                    <div class="cal-head">
+                        <div class="cal-nav">
+                            <button class="btn-modern btn-modern-outline" onclick="calNav(-1)" title="חודש קודם">›</button>
+                            <button class="btn-modern btn-modern-outline" onclick="calToday()">היום</button>
+                            <button class="btn-modern btn-modern-outline" onclick="calNav(1)" title="חודש הבא">‹</button>
                         </div>
-
-                        <div class="time-card-item" style="border-top: 3px solid var(--accent-color); background: var(--bg-color);">
-                            <div class="time-card-title">📜 תאריך עברי ואירועי היום מ-Hebcal.com</div>
-                            <div class="time-card-val" style="color: var(--primary-color); font-size: 18px;" id="cardHebrewDate">טוען נתונים מ-Hebcal...</div>
-                            <div class="time-card-sub" id="cardHebrewEvents">חגים ואירועים (Hebcal): טוען...</div>
-                        </div>
+                        <div class="cal-title" id="calTitle">טוען…</div>
+                        <button class="btn-modern btn-modern-primary" onclick="openCalEventModal()">＋ הוסף אירוע / טקסט</button>
                     </div>
-
-                    <div class="monthly-cal-wrapper">
-                        <div class="monthly-cal-header-bar">
-                            <button class="control-btn" style="padding: 2px 8px; font-size: 14px;" onclick="changeCalendarMonth(-1)">&gt; חודש קודם</button>
-                            <span id="monthlyTitleDisplay">טוען חודש...</span>
-                            <button class="control-btn" style="padding: 2px 8px; font-size: 14px;" onclick="changeCalendarMonth(1)">חודש הבא &lt;</button>
-                        </div>
-                        <div class="monthly-grid">
-                            <div class="monthly-day-header">ראשון</div>
-                            <div class="monthly-day-header">שני</div>
-                            <div class="monthly-day-header">שלישי</div>
-                            <div class="monthly-day-header">רביעי</div>
-                            <div class="monthly-day-header">חמישי</div>
-                            <div class="monthly-day-header">שישי</div>
-                            <div class="monthly-day-header">שבת</div>
-                        </div>
-                        <div class="monthly-grid" id="monthlyDaysGrid" style="margin-top: 4px;"></div>
+                    <div class="cal-layers" id="calLayers">
+                        <button type="button" class="layer-chip l-shabbat" data-layer="shabbat" onclick="toggleCalLayer('shabbat')">✡ שבתות ופרשות</button>
+                        <button type="button" class="layer-chip l-holidays" data-layer="holidays" onclick="toggleCalLayer('holidays')">🎉 חגים ומועדים</button>
+                        <button type="button" class="layer-chip l-times" data-layer="times" onclick="toggleCalLayer('times')">⏱ זמנים (נרות, צומות)</button>
+                        <button type="button" class="layer-chip l-yahr" data-layer="yahrtzeit" onclick="toggleCalLayer('yahrtzeit')">🕯 יארצייט</button>
+                        <button type="button" class="layer-chip l-custom" data-layer="custom" onclick="toggleCalLayer('custom')">✏ האירועים שלי</button>
                     </div>
+                    <div class="cal-dow" id="calDow"></div>
+                    <div class="cal-grid" id="calGrid"></div>
+                    <div class="set-note" style="margin:10px 0 0 0;">לחצו על יום כדי לראות את כל פרטיו ולהוסיף אירוע או טקסט. הזמנים מחושבים אוטומטית לפי העיר שנבחרה בלשונית "זמנים": <b id="calLocName"></b>.</div>
                 </div>
             </div>
 
             <div id="tabTimes" class="tab-content">
-                <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px;">
-                    <h3 style="color: var(--primary-color); margin-top: 0; margin-bottom: 6px;">🕒 ניהול זמני תפילות בשקופית שבת קודש</h3>
-                    <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">כאן תוכל להגדיר ולשנות את שעות התפילות שיופיעו בשקופית הראשונה של זמני השבת.</p>
-                    
+                <div class="set-card">
+                    <h3>📍 מיקום וזמני שבת (מתעדכנים אוטומטית)</h3>
+                    <p class="set-note">בחרו אזור ויישוב, והמערכת תחשב את זמני השבת והצומות בלי חיבור לאינטרנט.</p>
                     <div class="form-grid">
                         <div class="form-group">
-                            <label>מנחה ערב שבת:</label>
-                            <input type="text" id="inTimeMinchaErev" placeholder="למשל: 16:30">
+                            <label>אזור / מדינה:</label>
+                            <button type="button" class="pick-btn" id="btnPickCountry" onclick="openCountryPicker()">🌍 בחר אזור</button>
                         </div>
                         <div class="form-group">
-                            <label>שחרית הודו:</label>
-                            <input type="text" id="inTimeShacharitHodud" placeholder="למשל: 16:30">
+                            <label>עיר / ישוב:</label>
+                            <button type="button" class="pick-btn" id="btnPickCity" onclick="openCityPicker()">📍 בחר ישוב</button>
                         </div>
-                        <div class="form-group">
-                            <label>מנחה של שבת:</label>
-                            <input type="text" id="inTimeMinchaShabbat" placeholder="למשל: 16:30">
+                        <div class="form-group full-width">
+                            <label>דקות להדלקת נרות לפני השקיעה:</label>
+                            <input type="number" id="inCandleMins" min="0" max="90" onchange="onCandleMinsChange(this.value)">
                         </div>
-                        <div class="form-group">
-                            <label>ערבית מוצאי שבת:</label>
-                            <input type="text" id="inTimeArvitMotzei" placeholder="למשל: 16:30">
-                        </div>
+                    </div>
+                    <div class="zman-box" id="zmanBox"></div>
+                    <label class="switch-row" style="border-top:1px solid var(--border-color); margin-top:8px;"><input type="checkbox" id="optShowZmanSlide" onchange="onShowZmanSlide(this.checked)"><span><b>הצג את זמני השבת בשקופית "שבת קודש"</b><small>שורה של הדלקת נרות, צאת השבת ור"ת מתחת לזמני התפילות</small></span></label>
+                </div>
+                <div class="set-card">
+                    <h3>🕒 ניהול זמני תפילות בשקופית שבת קודש</h3>
+                    <p class="set-note">שעות התפילות שיופיעו בשקופית הראשונה בלוח.</p>
+                    <div class="form-grid">
+                        <div class="form-group"><label>מנחה ערב שבת:</label><input type="text" id="inTimeMinchaErev" placeholder="למשל: 16:30"></div>
+                        <div class="form-group"><label>שחרית הודו:</label><input type="text" id="inTimeShacharitHodud" placeholder="למשל: 16:30"></div>
+                        <div class="form-group"><label>מנחה של שבת:</label><input type="text" id="inTimeMinchaShabbat" placeholder="למשל: 16:30"></div>
+                        <div class="form-group"><label>ערבית מוצאי שבת:</label><input type="text" id="inTimeArvitMotzei" placeholder="למשל: 16:30"></div>
                     </div>
                 </div>
             </div>
@@ -2047,11 +2065,22 @@
                             <h4 style="margin: 0 0 6px 0; color: #881337;">🏛️ ירושלמי עתיק מעוטר</h4>
                             <p style="font-size: 12px; color: var(--text-secondary); margin:0;">גווני בורדו-חמרה קלאסיים עם עיטורי כבוד מיוחדים.</p>
                         </div>
+                        <div class="theme-card-option" id="themeOpt_parchment" onclick="setTheme('parchment')">
+                            <h4 style="margin: 0 0 6px 0; color: #8B4513;">📜 מגילת קלף</h4>
+                            <p style="font-size: 12px; color: var(--text-secondary); margin:0;">רקע קלף עתיק עם כותרות חומות ומסגרות זהב, בהשראת לוחות מסורתיים.</p>
+                        </div>
+                        <div class="theme-card-option" id="themeOpt_royal" onclick="setTheme('royal')">
+                            <h4 style="margin: 0 0 6px 0; color: #1E40AF;">👑 וילון כחול-זהב</h4>
+                            <p style="font-size: 12px; color: var(--text-secondary); margin:0;">כחול עמוק ויוקרתי עם עיטורי זהב מלכותיים וכותרות בולטות.</p>
+                        </div>
                         <div class="theme-card-option" id="themeOpt_sky" onclick="setTheme('sky')">
                             <h4 style="margin: 0 0 6px 0; color: #0369A1;">🌤️ תכלת שמיים הרמוני</h4>
                             <p style="font-size: 12px; color: var(--text-secondary); margin:0;">גווני תכלת ושלום מאירים ונעימים לעין.</p>
                         </div>
                     </div>
+                    <h3 style="color: var(--primary-color); margin: 24px 0 0;">▬ עיצוב השורה העליונה</h3>
+                    <p style="font-size: 13px; color: var(--text-secondary); margin: 6px 0 0;">בחר איך תיראה השורה העליונה (שעון ותאריך). העיצוב מתאים את עצמו לערכת הנושא שבחרת.</p>
+                    <div class="bar-opts" id="barOpts"></div>
                 </div>
             </div>
 
@@ -2132,7 +2161,7 @@
                     <label class="switch-row"><input type="checkbox" id="optAutoStart" onchange="onAutoStartToggle(this.checked)"><span><b>הפעלה אוטומטית בהדלקת הטלוויזיה</b><small>האפליקציה נפתחת מעצמה בהדלקה ומציגה ישר את שקופיות הלוח</small></span></label>
                     <div class="set-subnote" id="autoStartNote"></div>
                     <label class="switch-row"><input type="checkbox" id="optStayLogged" onchange="onStayLoggedToggle(this.checked)"><span><b>השאר את החשבון מחובר במכשיר</b><small>בלי זה לא ניתן לפתוח ישר את הלוח אחרי הדלקה</small></span></label>
-                    <label class="switch-row"><input type="checkbox" id="optShowInRecents" onchange="onRecentsToggle(this.checked)"><span><b>הצג ברשימת האפליקציות האחרונות</b><small>כבוי = האפליקציה מוסתרת מרשימת "אפליקציות ברקע"</small></span></label>
+                    <label class="switch-row"><input type="checkbox" id="optShowInRecents" onchange="onRecentsToggle(this.checked)"><span><b>הצג את אייקון האפליקציה במסך הבית</b><small>כבוי = האייקון מוסתר ממסך הבית ומרשימת האפליקציות (האפליקציה ממשיכה לעבוד)</small></span></label>
                 </div>
             </div>
 
@@ -2383,6 +2412,69 @@
         <div class="modal-actions">
             <button class="btn" id="donorSaveBtn" style="background:var(--primary-color); margin:0;" onclick="submitDonor()">שמור</button>
             <button class="btn btn-secondary" style="margin:0;" onclick="closeDonorModal()">ביטול</button>
+        </div>
+    </div>
+</div>
+
+<div id="pickerModal" class="modal-overlay">
+    <div class="modal-box" style="width: 460px; max-height: 92%;">
+        <h3 id="pickerTitle" style="margin:0; color:var(--primary-color);">בחירה</h3>
+        <input type="text" id="pickerSearch" placeholder="🔍 חיפוש…" oninput="pickerFilter()" autocomplete="off">
+        <div class="picker-list" id="pickerList"></div>
+        <div class="modal-actions"><button class="btn btn-secondary" style="margin:0;" onclick="closePicker()">סגור</button></div>
+    </div>
+</div>
+
+<div id="calEventModal" class="modal-overlay" data-enter-submit="calEvSave">
+    <div class="modal-box" style="width: 430px;">
+        <h3 id="calEvTitleHead" style="margin:0; color:var(--primary-color);">✏ אירוע / טקסט בלוח השנה</h3>
+        <div class="form-group"><label>כותרת / טקסט *</label><input type="text" id="calEvText" placeholder="למשל: שיעור מיוחד, סעודת מצווה…"></div>
+        <div class="form-group"><label>תאריך *</label><input type="date" id="calEvDate"></div>
+        <div class="form-group"><label>שעה (לא חובה)</label><input type="time" id="calEvTime"></div>
+        <div class="form-group"><label>חזרה</label>
+            <select id="calEvRepeat">
+                <option value="none">ללא (פעם אחת)</option>
+                <option value="heb">כל שנה לפי התאריך העברי</option>
+                <option value="greg">כל שנה לפי התאריך הלועזי</option>
+            </select>
+        </div>
+        <label class="switch-row" style="border:none; padding:4px 0;"><input type="checkbox" id="calEvShow" checked><span><b>הצג בלוח המודעות</b><small>אם כבוי – האירוע יופיע רק בניהול</small></span></label>
+        <div class="modal-actions">
+            <button class="btn" id="calEvSave" style="background:var(--primary-color); margin:0;" onclick="saveCalEvent()">שמור</button>
+            <button class="btn btn-secondary" id="calEvDelete" style="margin:0; display:none; flex:0 0 auto; background:#EF4444; color:#fff;" onclick="deleteCalEvent()">מחק</button>
+            <button class="btn btn-secondary" style="margin:0;" onclick="closeCalEventModal()">ביטול</button>
+        </div>
+    </div>
+</div>
+
+<div id="dayModal" class="modal-overlay">
+    <div class="modal-box" style="width: 460px;">
+        <h3 id="dayModalTitle" style="margin:0; color:var(--primary-color);">יום</h3>
+        <div id="dayModalBody" class="day-list"></div>
+        <div class="modal-actions">
+            <button class="btn" style="background:var(--primary-color); margin:0;" data-autofocus onclick="addEventOnDay()">＋ הוסף אירוע / טקסט</button>
+            <button class="btn btn-secondary" style="margin:0;" onclick="closeDayModal()">סגור</button>
+        </div>
+    </div>
+</div>
+
+<div id="calBoardModal" class="modal-overlay">
+    <div class="modal-box" style="width: 460px;">
+        <h3 style="margin:0; color:var(--primary-color);">⚙ הגדרות שקופית לוח השנה</h3>
+        <div class="form-group"><label>כותרת השקופית</label><input type="text" id="cbTitle" placeholder="לוח שנה עברי"></div>
+        <div class="chip-row" id="cbLayers"></div>
+        <label class="switch-row" style="border:none; padding:4px 0;"><input type="checkbox" id="cbUpcoming"><span><b>הצג עמודת "בקרוב"</b><small>חגים, זמני שבת וצומות הקרובים לצד הלוח</small></span></label>
+        <div class="form-group"><label>רקע גרפי (תמונה, לא חובה)</label>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <label class="btn-modern btn-modern-outline" for="cbBgFile" tabindex="0" style="cursor:pointer;">🖼 בחר תמונה</label>
+                <input type="file" id="cbBgFile" accept="image/*" style="display:none;" onchange="onCalBgFile(event)">
+                <button class="btn-modern btn-modern-outline" type="button" onclick="clearCalBg()">הסר רקע</button>
+                <span id="cbBgInfo" class="set-note" style="margin:0;"></span>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn" style="background:var(--primary-color); margin:0;" onclick="saveCalBoard()">שמור</button>
+            <button class="btn btn-secondary" style="margin:0;" onclick="closeCalBoardModal()">ביטול</button>
         </div>
     </div>
 </div>
@@ -2988,7 +3080,7 @@
         applyRemoteMode();
         applyUiScale();
         startupFlow();
-        nativeCall('setShowInRecents', device.showInRecents !== false);
+        nativeCall('setShowLauncherIcon', device.showInRecents !== false);
         applySidebarState();
         setTimeout(initNetworkChecker, 3000);
         initLiveClockAndHebcal();
@@ -3109,7 +3201,7 @@
         const shul = dbSynagogues[currentSynagogueKey];
         
         document.getElementById('welcomeTitle').innerText = shul.name;
-        for(let i=1; i<=5; i++) { 
+        for(let i=1; i<=6; i++) { 
             const footerElem = document.getElementById(`lblSynagogueFooter${i}`);
             if(footerElem) footerElem.innerText = shul.name; 
         }
@@ -3182,7 +3274,7 @@
     function applyTheme(themeName) {
         Array.from(document.body.classList).filter(c => c.indexOf('theme-') === 0).forEach(c => document.body.classList.remove(c));
         document.body.classList.add(`theme-${themeName}`);
-        ['classic', 'gold', 'jerusalem', 'sky'].forEach(t => {
+        ['classic', 'gold', 'jerusalem', 'sky', 'parchment', 'royal'].forEach(t => {
             const opt = document.getElementById(`themeOpt_${t}`);
             if(opt) {
                 if(t === themeName) opt.classList.add('active');
@@ -3268,7 +3360,8 @@
             rosh: { name: "הכרזת ראש חודש", role: "מוצגת אוטומטית מיום שלישי ועד מוצאי שבת מברכין" },
             yahrtzeit: { name: "יארצייט ואזכרות השבוע", role: "מוצגת אוטומטית רק אם יש אזכרות השבוע לפי הפרשה" },
             events: { name: "אירועים מיוחדים השבוע", role: "מודעות ושיעורי תורה" },
-            donors: { name: "נדיבי עם – רשימת השותפים והתורמים", role: "טבלת תורמים (נערכת ב\"ניהול רשימות\")" }
+            donors: { name: "נדיבי עם – רשימת השותפים והתורמים", role: "טבלת תורמים (נערכת ב\"ניהול רשימות\")" },
+            calendar: { name: "לוח שנה עברי", role: "לוח חודשי עברי-לועזי עם חגים, פרשות וזמנים" }
         };
 
         let allSlidesRows = [];
@@ -3325,7 +3418,7 @@
             if (row.type === 'system') {
                 tr.innerHTML = `
                     <td><input type="number" data-fk="o:${row.key}" min="1" max="20" value="${row.order}" onchange="updateSlideOrder('${row.key}', this.value)" style="width: 60px; text-align: center;"></td>
-                    <td><b>${row.name}</b></td>
+                    <td><b>${row.name}</b>${row.key === 'calendar' ? ' <button type="button" class="row-btn edit" onclick="openCalBoardModal()">⚙ הגדרות לוח שנה</button>' : ''}</td>
                     <td><span style="color:var(--text-secondary); font-size:12px;">${row.role}</span></td>
                     <td><input type="number" data-fk="d:${row.key}" min="1" max="60" value="${row.duration}" onchange="updateSlideDuration('${row.key}', this.value)" style="width: 70px; text-align: center;"> שנ'</td>
                     <td>
@@ -4428,7 +4521,7 @@
         document.getElementById('welcomeTitle').innerText = shul.name;
         document.getElementById('adminPanelHeaderTitle').innerText = shul.adminTitleText;
         document.getElementById('adminMenuBtnText').innerText = shul.adminTitleText;
-        for(let i=1; i<=5; i++) { 
+        for(let i=1; i<=6; i++) { 
             const fElem = document.getElementById(`lblSynagogueFooter${i}`);
             if(fElem) fElem.innerText = shul.name; 
         }
@@ -4500,7 +4593,7 @@
         registerModal: 'closeRegisterModal', forgotModal: 'closeForgotModal', customSlideModal: 'closeAddCustomSlideModal',
         memberModal: 'closeAddMemberModal', editMemberModal: 'closeEditMemberModal', editYahrtzeitModal: 'closeEditYahrtzeitModal',
         exportModal: 'closeExportModal', yahrtzeitModal: 'closeAddYahrtzeitModal', confirmModal: 'closeConfirmModal',
-        pinModal: 'closePinModal', donorModal: 'closeDonorModal'
+        pinModal: 'closePinModal', donorModal: 'closeDonorModal', pickerModal: 'closePicker', calEventModal: 'closeCalEventModal', dayModal: 'closeDayModal', calBoardModal: 'closeCalBoardModal'
     };
     const TEXT_TYPES = ['text', 'search', 'email', 'url', 'tel', 'password', ''];
     const STEP_TYPES = ['number', 'time', 'date', 'datetime-local', 'month', 'week'];
@@ -4740,5 +4833,6 @@
 })();
 </script>
 
+<script src="v4.js"></script>
 </body>
 </html>
